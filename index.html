@@ -18,7 +18,7 @@
   <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Noch ein Bett?">
+  <meta name="apple-mobile-web-app-title" content="Bettjagd">
 
   <meta property="og:type" content="website">
   <meta property="og:title" content="Habt ihr noch ein Bett?">
@@ -369,6 +369,7 @@
       gap: 10px;
       flex: 1 1 0;
       min-height: 0;
+      overflow: hidden;
       animation: slide-in 0.22s ease-out;
       animation-fill-mode: backwards;
     }
@@ -459,20 +460,30 @@
     .flag.alert { background: #fef3c7; color: #854d0e; }
     .flag.dark  { background: #1e3a3a; color: #fff; }
 
-    /* ===== Feedback Banner ===== */
+    /* ===== Feedback: fixiert am unteren Bildschirmrand, damit es nicht das Layout verschiebt ===== */
     .feedback {
-      margin-top: 10px;
-      padding: 12px 14px;
+      position: fixed;
+      left: 50%;
+      bottom: 14px;
+      transform: translateX(-50%);
+      width: calc(100% - 28px);
+      max-width: 460px;
+      padding: 14px 16px;
       border-radius: 14px;
-      font-size: 13px;
+      font-size: 13.5px;
       line-height: 1.4;
-      animation: slide-up 0.2s ease-out;
+      background: #fff;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.22), 0 2px 6px rgba(0,0,0,0.08);
+      animation: slide-up 0.22s ease-out;
       display: none;
+      z-index: 200;
+      max-height: 45vh;
+      overflow-y: auto;
     }
     .feedback.visible { display: block; }
     .feedback.ok  { background: var(--ok-soft);  border-left: 4px solid var(--ok);  color: #14532d; }
     .feedback.bad { background: var(--warn-soft); border-left: 4px solid var(--warn); color: #7f1d1d; }
-    .feedback strong { display: block; font-weight: 800; margin-bottom: 4px; font-size: 13.5px; }
+    .feedback strong { display: block; font-weight: 800; margin-bottom: 4px; font-size: 14px; }
 
     /* ===== End Screen ===== */
     #endScreen {
@@ -798,7 +809,6 @@
     <span class="mode-chip schwarm" id="schwarmChip" style="display:none;">🎯 ISO 5</span>
     <span class="streak-chip" id="streakChip">🔥 3</span>
     <span class="score-chip" id="scoreDisplay">0</span>
-    <button class="mute-btn" id="btnMute" title="Sound">🔊</button>
   </div>
 
   <div class="patient-card" id="patientCard">
@@ -933,7 +943,7 @@ const PATIENTS = [
    ============================================================ */
 // Station-Board Darstellung: Name + Alter/Sex + Diagnose + Iso-Status + PG
 // chips: [{ t: text, c: class }] — c in "" | "warn" | "alert" | "dark" | "ok" | "pg"
-function sxA(sex, age) { return `<span class="sex-ico">${sex === "m" ? "♂" : "♀"}</span> ${age} J`; }
+function sxA(sex, age) { return `${age} J`; }
 
 const ROOMMATES = {
   empty_einzel: { empty:true, roomType:"Einzelzimmer",
@@ -1230,8 +1240,7 @@ function renderEventRound(evState) {
   `;
 
   document.getElementById("optionsContainer").innerHTML = pool.map((p, i) => {
-    const sx = p.sex === "m" ? "♂" : "♀";
-    const chips = [{t:`<span class="sex-ico">${sx}</span> ${p.alter} J`, c:""}];
+    const chips = [{t:`${p.alter} J`, c:""}];
     p.flags.forEach(f => {
       let c = "";
       if (/^4MRGN|Strenge Iso/i.test(f) || /MRSA|difficile|Noro|VRE|Tröpfchen|Influenza|RSV/i.test(f)) c = "warn";
@@ -1239,9 +1248,6 @@ function renderEventRound(evState) {
       else if (/Sterbe/i.test(f)) c = "dark";
       chips.push({t:f, c});
     });
-    chips.push({t:p.bloodGroup, c:"neutral"});
-    chips.push({t:`Aufn. ${p.admTime}`, c:"neutral"});
-    chips.push({t:`PG ${p.pg}`, c:"pg"});
     const chipsHtml = chips.map(c => `<span class="mini-chip ${c.c}">${c.t}</span>`).join("");
     return `
       <button class="option" data-idx="${i}">
@@ -1732,7 +1738,6 @@ function nextRound() {
     else if (/Sterbe/i.test(f)) cls += " dark";
     return `<span class="${cls}">${f}</span>`;
   }).join("");
-  const sexLabel = patient.sex === "m" ? "♂" : "♀";
   const goldenPill = state.goldenThisRound
     ? `<div class="golden-pill">🌟 ${GOLDEN_POINTS_X}× Punkte · +${GOLDEN_TIME_BONUS}s</div>`
     : "";
@@ -1743,13 +1748,13 @@ function nextRound() {
   card.innerHTML = `
     ${goldenPill}
     <h2>${patient.kuerzel}</h2>
-    <div class="meta">${patient.alter} J · <span class="sex-ico">${sexLabel}</span></div>
+    <div class="meta">${patient.alter} J</div>
     <div class="diag">${patient.diag}</div>
     <div class="flags">${flagsHtml}</div>
   `;
 
   document.getElementById("optionsContainer").innerHTML = options.map((opt, i) => {
-    const chipsHtml = (opt.chips || []).map(c => `<span class="mini-chip ${c.c || ''}">${c.t}</span>`).join("");
+    const chipsHtml = (opt.chips || []).filter(c => c.c !== 'pg').map(c => `<span class="mini-chip ${c.c || ''}">${c.t}</span>`).join("");
     const mainText = opt.empty ? opt.roomType : opt.roommate.line;
     return `
     <button class="option${opt.empty ? ' is-empty' : ''}" data-idx="${i}">
@@ -2096,10 +2101,6 @@ document.getElementById("btnRestart").addEventListener("click", () => {
 document.getElementById("btnBack").addEventListener("click", () => {
   updateStartHs();
   showScreen("startScreen");
-});
-document.getElementById("btnMute").addEventListener("click", (e) => {
-  muted = !muted;
-  e.target.textContent = muted ? "🔇" : "🔊";
 });
 
 // Pause Timer when tab hidden (prevent "losing" time in background)
