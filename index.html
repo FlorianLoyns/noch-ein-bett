@@ -1,0 +1,2120 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+  <meta name="theme-color" content="#0d7377">
+
+  <title>Habt ihr noch ein Bett?</title>
+  <meta name="description" content="Endloses Quiz zur Bettenzuweisung in der Pflege. Richtig = Zeitbonus. Wie weit kommst du?">
+  <link rel="canonical" href="https://florianloyns.github.io/noch-ein-bett/">
+  <meta name="robots" content="index,follow">
+
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Noch ein Bett?">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Habt ihr noch ein Bett?">
+  <meta property="og:description" content="Endloses Bettenzuweisungs-Quiz für die Pflegeausbildung.">
+  <meta property="og:image" content="https://florianloyns.github.io/noch-ein-bett/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+
+  <style>
+    :root {
+      --teal: #0d7377;
+      --teal-dark: #0a5c5f;
+      --teal-soft: #d6ecec;
+      --teal-light: #e6f3f3;
+      --bg: #f6f8f7;
+      --bg2: #eaf2f1;
+      --card: #ffffff;
+      --ink: #0b1818;
+      --body: #2d3d3d;
+      --muted: #6b7b7b;
+      --border: #e4eae9;
+      --ok: #16a34a;
+      --ok-soft: #dcfce7;
+      --warn: #dc2626;
+      --warn-soft: #fef2f2;
+      --gold: #eab308;
+      /* Iso-Akzent-Palette (Station-Whiteboard Codes) */
+      --ac-kontakt: #dc2626;
+      --ac-tropf:   #2563eb;
+      --ac-immun:   #d97706;
+      --ac-sterb:   #7c3aed;
+      --ac-dem:     #ea580c;
+      --ac-free:    #16a34a;
+      --ac-stable:  #94a3b8;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { height: 100%; overflow-x: hidden; }
+    body {
+      margin: 0;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--body);
+      font-size: 15px;
+      line-height: 1.45;
+      -webkit-font-smoothing: antialiased;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    @keyframes slide-in {
+      from { transform: translateX(100%); opacity: 0; }
+      to   { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slide-up {
+      from { transform: translateY(30px); opacity: 0; }
+      to   { transform: translateY(0); opacity: 1; }
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50%      { transform: scale(1.04); }
+    }
+    @keyframes float-up {
+      0%   { transform: translate(-50%, 0) scale(0.6); opacity: 0; }
+      20%  { opacity: 1; }
+      100% { transform: translate(-50%, -80px) scale(1.2); opacity: 0; }
+    }
+    @keyframes flash-warn {
+      0%, 100% { background: var(--warn); }
+      50%      { background: #ff5555; }
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25%      { transform: translateX(-6px); }
+      75%      { transform: translateX(6px); }
+    }
+    @keyframes trophy-pop {
+      0%   { transform: scale(0.5) rotate(-15deg); opacity: 0; }
+      60%  { transform: scale(1.15) rotate(5deg); opacity: 1; }
+      100% { transform: scale(1) rotate(0deg); opacity: 1; }
+    }
+
+    /* ===== Screens ===== */
+    .screen {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+    }
+    .screen.hidden { display: none; }
+
+    /* ===== Start Screen ===== */
+    #startScreen {
+      background: linear-gradient(135deg, #0d7377 0%, #064548 100%);
+      color: #fff;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    #startScreen .tagline {
+      opacity: 0.7;
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    #startScreen h1 {
+      font-size: clamp(32px, 9vw, 48px);
+      font-weight: 900;
+      margin: 0 0 16px;
+      letter-spacing: -0.02em;
+      line-height: 1.05;
+      max-width: 400px;
+    }
+    #startScreen p {
+      font-size: 15px;
+      opacity: 0.88;
+      margin: 6px 0;
+      max-width: 380px;
+    }
+    .start-btn {
+      margin-top: 28px;
+      background: #fff;
+      color: var(--teal);
+      border: 0;
+      padding: 16px 32px;
+      border-radius: 14px;
+      font-weight: 800;
+      font-size: 17px;
+      cursor: pointer;
+      font-family: inherit;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+      transition: transform 0.15s;
+    }
+    .start-btn:active { transform: translateY(1px); }
+    .rules-note {
+      margin-top: 22px;
+      font-size: 12.5px;
+      opacity: 0.88;
+      background: rgba(255,255,255,0.08);
+      padding: 12px 14px;
+      border-radius: 10px;
+      line-height: 1.6;
+      max-width: 340px;
+      text-align: left;
+    }
+    .rules-note .rule-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 2px 0;
+    }
+    .rules-note .rule-row strong { font-weight: 800; }
+    .hs-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.12);
+      padding: 8px 16px;
+      border-radius: 999px;
+      margin-top: 18px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .hs-pill .hs-label { opacity: 0.7; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; }
+    .hs-pill .hs-val { color: var(--gold); font-size: 16px; font-weight: 900; }
+
+    /* ===== Quiz Screen ===== */
+    #quizScreen {
+      background: var(--bg);
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .timer-wrap {
+      flex: 1;
+      position: relative;
+      height: 28px;
+    }
+    .timer-bar {
+      position: absolute;
+      inset: 0;
+      height: 100%;
+      background: var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .timer-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--teal) 0%, #16a34a 100%);
+      width: 100%;
+      transition: width 0.1s linear, background 0.25s;
+      border-radius: 14px;
+    }
+    .timer-bar-fill.warn { background: linear-gradient(90deg, #f59e0b 0%, var(--warn) 100%); }
+    .timer-bar-fill.critical {
+      background: var(--warn);
+      animation: flash-warn 0.5s infinite;
+    }
+    .timer-label {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 14px;
+      color: #fff;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.35);
+      letter-spacing: 0.5px;
+      font-variant-numeric: tabular-nums;
+    }
+    .score-chip {
+      background: var(--teal);
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 14px;
+      font-weight: 900;
+      font-size: 15px;
+      min-width: 56px;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+    .streak-chip {
+      background: var(--gold);
+      color: #1a1a1a;
+      padding: 6px 10px;
+      border-radius: 14px;
+      font-weight: 900;
+      font-size: 12px;
+      display: none;
+      animation: pulse 0.8s ease-in-out infinite;
+    }
+    .streak-chip.visible { display: inline-block; }
+    .mute-btn {
+      background: transparent;
+      border: 0;
+      color: var(--muted);
+      font-size: 18px;
+      cursor: pointer;
+      padding: 4px 6px;
+      line-height: 1;
+    }
+
+    /* ===== Patient Card (reduziert) ===== */
+    .patient-card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 14px 18px;
+      box-shadow: 0 2px 12px rgba(15,31,31,0.06);
+      margin-bottom: 10px;
+      animation: slide-up 0.25s ease-out;
+      flex-shrink: 0;
+      cursor: grab;
+      touch-action: none;
+      transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s;
+      will-change: transform;
+    }
+    .patient-card:active { cursor: grabbing; }
+    .patient-card.dragging {
+      transition: none;
+      box-shadow: 0 16px 36px rgba(13, 115, 119, 0.28), 0 4px 10px rgba(0,0,0,0.12);
+      z-index: 50;
+      opacity: 0.96;
+      pointer-events: none;
+      transform-origin: center;
+    }
+    .option.drag-over {
+      border-color: var(--teal);
+      background: var(--teal-light);
+      transform: scale(1.01);
+      box-shadow: 0 4px 18px rgba(13, 115, 119, 0.22);
+    }
+    .drag-hint {
+      font-size: 10.5px;
+      color: var(--muted);
+      margin-top: 6px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      opacity: 0.7;
+    }
+    .pg-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      line-height: 1;
+    }
+    .pg-badge.pg-1 { background: linear-gradient(135deg, #65a30d 0%, #4d7c0f 100%); box-shadow: 0 3px 10px rgba(77,124,15,0.4); }
+    .pg-badge.pg-2 { background: linear-gradient(135deg, #0d7377 0%, #0a5c5f 100%); box-shadow: 0 3px 10px rgba(13,115,119,0.4); }
+    .pg-badge.pg-3 { background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%); box-shadow: 0 3px 10px rgba(180,83,9,0.4); }
+    .pg-badge.pg-4 { background: linear-gradient(135deg, #ea580c 0%, #9a3412 100%); box-shadow: 0 3px 10px rgba(154,52,18,0.4); }
+    .pg-badge.pg-5 { background: linear-gradient(135deg, #dc2626 0%, #7f1d1d 100%); box-shadow: 0 3px 10px rgba(127,29,29,0.4); }
+    .pg-badge .pg-label { font-size: 8.5px; letter-spacing: 0.8px; opacity: 0.85; margin-bottom: 1px; }
+    .pg-badge .pg-num { font-size: 24px; font-weight: 900; letter-spacing: -0.03em; }
+    .patient-card h2 {
+      margin: 0 0 2px;
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+      line-height: 1.1;
+    }
+    .patient-card .meta {
+      color: var(--muted);
+      font-size: 15.5px;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+    .patient-card .diag {
+      color: var(--ink);
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      line-height: 1.3;
+    }
+
+    /* ===== Options (screen-filling) ===== */
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+      min-height: 0;
+    }
+    .option {
+      background: var(--card);
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      padding: 10px 14px;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: inherit;
+      text-align: left;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      flex: 1 1 0;
+      min-height: 0;
+      animation: slide-in 0.22s ease-out;
+      animation-fill-mode: backwards;
+    }
+    .option:nth-child(1) { animation-delay: 0.02s; }
+    .option:nth-child(2) { animation-delay: 0.06s; }
+    .option:nth-child(3) { animation-delay: 0.10s; }
+    .option:nth-child(4) { animation-delay: 0.14s; }
+    .option:nth-child(5) { animation-delay: 0.18s; }
+    .option:active { transform: scale(0.985); }
+    .option:hover { border-color: var(--teal); }
+    .option.correct { border-color: var(--ok); background: var(--ok-soft); }
+    .option.wrong   { border-color: var(--warn); background: var(--warn-soft); animation: shake 0.35s; }
+    .option.disabled { pointer-events: none; }
+    .option.disabled:not(.correct):not(.wrong) { opacity: 0.4; }
+    .option .opt-body { flex: 1; min-width: 0; }
+    .opt-top {
+      font-size: 10.5px;
+      font-weight: 800;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 2px;
+    }
+    .opt-main {
+      font-size: 15.5px;
+      font-weight: 800;
+      color: var(--ink);
+      line-height: 1.2;
+      letter-spacing: -0.005em;
+    }
+    .option.is-empty .opt-main { font-size: 17px; color: var(--ok); }
+    .mini-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 5px;
+    }
+    .mini-chip {
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      background: var(--teal-soft);
+      color: var(--teal-dark);
+      white-space: nowrap;
+    }
+    .sex-ico {
+      font-size: 1.55em;
+      font-weight: 900;
+      line-height: 1;
+      display: inline-block;
+      margin-right: 2px;
+      vertical-align: -2px;
+    }
+    /* Obere Karte: Icons deutlich größer */
+    .patient-card .meta .sex-ico { font-size: 24px; vertical-align: -3px; }
+    .patient-card .drag-arrow { font-size: 20px; vertical-align: -2px; }
+    .drag-arrow {
+      font-size: 16px;
+      font-weight: 900;
+      margin-right: 5px;
+      vertical-align: -1px;
+    }
+    .mini-chip.warn    { background: #fee2e2; color: #991b1b; }
+    .mini-chip.alert   { background: #fef3c7; color: #854d0e; }
+    .mini-chip.dark    { background: #1e3a3a; color: #fff; }
+    .mini-chip.ok      { background: #dcfce7; color: #14532d; }
+    .mini-chip.neutral { background: #e5e7eb; color: #374151; }
+    .mini-chip.pg      { background: #0d7377; color: #fff; font-weight: 800; }
+
+    /* Patient-Karte Flags */
+    .flags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 6px;
+    }
+    .flag {
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      background: var(--teal-soft);
+      color: var(--teal-dark);
+    }
+    .flag.warn  { background: #fee2e2; color: #991b1b; }
+    .flag.alert { background: #fef3c7; color: #854d0e; }
+    .flag.dark  { background: #1e3a3a; color: #fff; }
+
+    /* ===== Feedback Banner ===== */
+    .feedback {
+      margin-top: 10px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      font-size: 13px;
+      line-height: 1.4;
+      animation: slide-up 0.2s ease-out;
+      display: none;
+    }
+    .feedback.visible { display: block; }
+    .feedback.ok  { background: var(--ok-soft);  border-left: 4px solid var(--ok);  color: #14532d; }
+    .feedback.bad { background: var(--warn-soft); border-left: 4px solid var(--warn); color: #7f1d1d; }
+    .feedback strong { display: block; font-weight: 800; margin-bottom: 4px; font-size: 13.5px; }
+
+    /* ===== End Screen ===== */
+    #endScreen {
+      background: linear-gradient(135deg, #0d7377 0%, #064548 100%);
+      color: #fff;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+    #endScreen .score-box {
+      max-width: 380px;
+      width: 100%;
+      animation: slide-up 0.4s ease-out;
+    }
+    #endScreen .end-label {
+      font-size: 12px;
+      opacity: 0.7;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    #endScreen h2 {
+      font-size: 28px;
+      margin: 0 0 4px;
+      font-weight: 900;
+      letter-spacing: -0.01em;
+    }
+    #endScreen .big-score {
+      font-size: 96px;
+      font-weight: 900;
+      line-height: 1;
+      margin: 20px 0 6px;
+      color: #fff;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.04em;
+    }
+    #endScreen .score-detail {
+      opacity: 0.85;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+    #endScreen .highscore-banner {
+      background: var(--gold);
+      color: #1a1a1a;
+      padding: 10px 18px;
+      border-radius: 12px;
+      font-weight: 900;
+      font-size: 14px;
+      margin: 14px auto;
+      display: inline-block;
+      animation: trophy-pop 0.6s ease-out;
+    }
+    #endScreen .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin: 18px 0;
+      font-size: 13px;
+    }
+    #endScreen .stat {
+      background: rgba(255,255,255,0.1);
+      padding: 10px;
+      border-radius: 10px;
+    }
+    #endScreen .stat .stat-label {
+      opacity: 0.7;
+      font-size: 10.5px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    #endScreen .stat .stat-val {
+      font-size: 18px;
+      font-weight: 900;
+    }
+    #endScreen button {
+      width: 100%;
+      padding: 14px;
+      border: 0;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 15px;
+      cursor: pointer;
+      font-family: inherit;
+      margin-top: 8px;
+      transition: transform 0.12s;
+    }
+    #endScreen button:active { transform: translateY(1px); }
+    #endScreen button.primary { background: #fff; color: var(--teal); }
+    #endScreen button.share   { background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.25); }
+    #endScreen button.secondary { background: transparent; color: rgba(255,255,255,0.6); }
+    .share-toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.85);
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      z-index: 200;
+      animation: slide-up 0.25s ease-out;
+    }
+
+    /* ===== Float Score ===== */
+    .score-float {
+      position: fixed;
+      font-size: 30px;
+      font-weight: 900;
+      pointer-events: none;
+      animation: float-up 1s ease-out forwards;
+      z-index: 100;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+    .score-float.plus  { color: var(--ok); }
+    .score-float.minus { color: var(--warn); }
+
+    /* ===== Golden Patient ===== */
+    .patient-card.golden {
+      background: linear-gradient(135deg, #fff8dc 0%, #ffffff 70%);
+      box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.35), 0 6px 24px rgba(234, 179, 8, 0.35);
+      animation: slide-up 0.25s ease-out, golden-pulse 1.6s ease-in-out infinite;
+    }
+    @keyframes golden-pulse {
+      0%, 100% { box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.35), 0 6px 24px rgba(234, 179, 8, 0.25); }
+      50%      { box-shadow: 0 0 0 5px rgba(234, 179, 8, 0.55), 0 8px 30px rgba(234, 179, 8, 0.45); }
+    }
+    .golden-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%);
+      color: #fff;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 10.5px;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      box-shadow: 0 2px 6px rgba(234, 179, 8, 0.5);
+    }
+
+    /* ===== Trigger-Banner (Rush/Schwarm) ===== */
+    .trigger-banner {
+      position: fixed;
+      top: 35%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      padding: 22px 34px;
+      border-radius: 22px;
+      text-align: center;
+      z-index: 300;
+      color: #fff;
+      box-shadow: 0 14px 40px rgba(0,0,0,0.35);
+      animation: banner-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      pointer-events: none;
+      max-width: 320px;
+    }
+    .trigger-banner.rush     { background: linear-gradient(135deg, #f59e0b 0%, #dc2626 100%); }
+    .trigger-banner.schwarm  { background: linear-gradient(135deg, #0d7377 0%, #7c3aed 100%); }
+    .trigger-banner.pause    { background: linear-gradient(135deg, #78350f 0%, #3b2414 100%); }
+    .trigger-banner.personal { background: linear-gradient(135deg, #475569 0%, #1e293b 100%); }
+
+    /* ===== Identifikations-Event ===== */
+    .patient-card.is-event {
+      background: #ffffff;
+      border-left: 5px solid var(--teal);
+      padding-left: 16px;
+      cursor: default;
+    }
+    .event-label {
+      font-size: 10.5px;
+      font-weight: 900;
+      color: var(--teal);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .event-question {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--ink);
+      line-height: 1.35;
+    }
+    .trigger-banner .tb-title { font-size: 28px; font-weight: 900; letter-spacing: -0.02em; margin-bottom: 4px; line-height: 1.1; }
+    .trigger-banner .tb-sub   { font-size: 13px; opacity: 0.92; line-height: 1.35; }
+    .trigger-banner.fade-out  { animation: banner-fade 0.4s ease-in forwards; }
+    @keyframes banner-pop {
+      0%   { transform: translate(-50%, -50%) scale(0) rotate(-8deg); opacity: 0; }
+      70%  { transform: translate(-50%, -50%) scale(1.12) rotate(2deg); opacity: 1; }
+      100% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
+    }
+    @keyframes banner-fade {
+      to { opacity: 0; transform: translate(-50%, -50%) scale(0.85); }
+    }
+
+    /* ===== Rush / Schwarm Indikator oben ===== */
+    .mode-chip {
+      font-size: 11px;
+      font-weight: 900;
+      padding: 4px 9px;
+      border-radius: 10px;
+      letter-spacing: 0.5px;
+      color: #fff;
+      animation: pulse 1s ease-in-out infinite;
+    }
+    .mode-chip.rush    { background: linear-gradient(135deg, #f59e0b, #dc2626); }
+    .mode-chip.schwarm { background: linear-gradient(135deg, #0d7377, #7c3aed); }
+
+    /* ===== XP-System (Start/End) ===== */
+    .xp-box {
+      background: rgba(255,255,255,0.1);
+      padding: 14px 16px;
+      border-radius: 14px;
+      margin-top: 16px;
+      max-width: 340px;
+      width: 100%;
+      text-align: left;
+    }
+    .xp-box .xp-level {
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+    .xp-box .xp-level-name { color: var(--gold); }
+    .xp-box .xp-nums { opacity: 0.75; font-size: 11px; font-weight: 700; }
+    .xp-bar {
+      height: 8px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 6px;
+    }
+    .xp-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #eab308 0%, #f59e0b 100%);
+      transition: width 0.8s ease-out;
+      border-radius: 4px;
+    }
+    .xp-next {
+      font-size: 11.5px;
+      opacity: 0.85;
+      font-weight: 600;
+    }
+    .xp-gain-display {
+      display: inline-block;
+      background: var(--gold);
+      color: #1a1a1a;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-weight: 900;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+    .level-up-banner {
+      background: linear-gradient(135deg, var(--gold) 0%, #f59e0b 100%);
+      color: #1a1a1a;
+      padding: 10px 18px;
+      border-radius: 12px;
+      font-weight: 900;
+      font-size: 14px;
+      margin: 10px 0;
+      display: inline-block;
+      animation: trophy-pop 0.6s ease-out;
+      box-shadow: 0 6px 20px rgba(234,179,8,0.4);
+    }
+
+    footer {
+      text-align: center;
+      font-size: 10px;
+      color: var(--muted);
+      padding: 10px;
+    }
+    footer a { color: inherit; }
+    #startScreen footer, #endScreen footer { color: rgba(255,255,255,0.5); }
+    #startScreen footer a, #endScreen footer a { color: inherit; }
+  </style>
+</head>
+<body>
+
+<!-- ===== Start Screen ===== -->
+<div class="screen" id="startScreen">
+  <p class="tagline">ENDLOS-MODUS · PFLEGEAUSBILDUNG</p>
+  <h1>Habt ihr noch<br>ein Bett?</h1>
+  <p>Patient:innen ohne Ende. Richtig entscheiden verlängert die Schicht. Timer bei 0 — Ende.</p>
+
+  <div class="hs-pill" id="hsPill" style="display:none;">
+    <span class="hs-label">Bestmarke</span>
+    <span class="hs-val" id="hsVal">0</span>
+  </div>
+
+  <div class="xp-box" id="xpBoxStart" style="display:none;">
+    <div class="xp-level">
+      <span class="xp-level-name" id="xpLevelName">Auszubildende:r 1. Jahr</span>
+      <span class="xp-nums" id="xpLevelNums">0 XP</span>
+    </div>
+    <div class="xp-bar"><div class="xp-bar-fill" id="xpBarFill" style="width:0%"></div></div>
+  </div>
+
+  <button class="start-btn" id="btnStart">Schicht starten →</button>
+</div>
+
+<!-- ===== Quiz Screen ===== -->
+<div class="screen hidden" id="quizScreen">
+  <div class="topbar">
+    <div class="timer-wrap">
+      <div class="timer-bar">
+        <div class="timer-bar-fill" id="timerBarFill"></div>
+      </div>
+      <div class="timer-label" id="timerLabel">20.0</div>
+    </div>
+    <span class="mode-chip rush" id="rushChip" style="display:none;">⚡ RUSH 3</span>
+    <span class="mode-chip schwarm" id="schwarmChip" style="display:none;">🎯 ISO 5</span>
+    <span class="streak-chip" id="streakChip">🔥 3</span>
+    <span class="score-chip" id="scoreDisplay">0</span>
+    <button class="mute-btn" id="btnMute" title="Sound">🔊</button>
+  </div>
+
+  <div class="patient-card" id="patientCard">
+    <!-- Patient wird hier gerendert -->
+  </div>
+
+  <div class="options" id="optionsContainer"></div>
+
+  <div class="feedback" id="feedbackBox"></div>
+</div>
+
+<!-- ===== End Screen ===== -->
+<div class="screen hidden" id="endScreen">
+  <div class="score-box">
+    <div class="end-label">Schicht beendet</div>
+    <h2 id="endLevel">Gute Schicht</h2>
+    <div class="big-score" id="endScore">0</div>
+    <div class="score-detail" id="endDetail">Punkte</div>
+
+    <div class="highscore-banner" id="hsBanner" style="display:none;">
+      🏆 Neue Bestmarke!
+    </div>
+
+    <div id="levelUpBanner" class="level-up-banner" style="display:none;"></div>
+
+    <div class="xp-gain-display" id="xpGainDisplay" style="display:none;">+0 XP</div>
+
+    <div class="stats-grid">
+      <div class="stat">
+        <div class="stat-label">Richtig</div>
+        <div class="stat-val" id="endCorrect">0</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Beste Serie</div>
+        <div class="stat-val" id="endStreak">0</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Bestmarke</div>
+        <div class="stat-val" id="endHs">0</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Schicht-Dauer</div>
+        <div class="stat-val" id="endDuration">0s</div>
+      </div>
+    </div>
+
+    <button class="primary" id="btnRestart">Neue Schicht</button>
+    <button class="secondary" id="btnBack">Zurück zum Start</button>
+  </div>
+</div>
+
+<footer>
+  <a href="https://florianloyns.github.io/Impressum/" target="_blank" rel="noopener noreferrer">Impressum</a>
+</footer>
+
+<script>
+/* ============================================================
+   AUDIO
+   ============================================================ */
+let audioCtx = null, muted = false;
+function initAudio() {
+  if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+}
+function beep(freq, dur, type="sine", vol=0.22, delay=0) {
+  if (muted || !audioCtx) return;
+  setTimeout(() => {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type; osc.frequency.value = freq;
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    const now = audioCtx.currentTime;
+    gain.gain.setValueAtTime(vol, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + dur/1000);
+    osc.start(now); osc.stop(now + dur/1000);
+  }, delay);
+}
+const snd = {
+  tap:     () => beep(600, 40, "sine", 0.13),
+  correct: () => { beep(659, 70); beep(784, 70, "sine", 0.22, 80); beep(988, 130, "sine", 0.22, 160); },
+  wrong:   () => { beep(220, 180, "sawtooth", 0.15); beep(180, 220, "sawtooth", 0.13, 80); },
+  streak:  () => { beep(988, 60, "sine", 0.2); beep(1175, 60, "sine", 0.2, 60); beep(1397, 120, "sine", 0.2, 120); },
+  bell:    () => { beep(820, 60, "sine", 0.2); beep(1040, 80, "sine", 0.18, 80); beep(820, 60, "sine", 0.16, 180); },
+  gameover:() => { beep(440, 200, "sawtooth", 0.2); beep(349, 250, "sawtooth", 0.18, 200); beep(262, 400, "sawtooth", 0.16, 450); },
+};
+
+/* ============================================================
+   PATIENT POOL
+   ============================================================ */
+const PATIENTS = [
+  { kuerzel:"Frau Weber",    sex:"w", alter:76, diag:"Akute Gastroenteritis",         flags:["NORO-Verdacht"],              kind:"noro",    pg:3 },
+  { kuerzel:"Herr Müller",   sex:"m", alter:72, diag:"Post-Op Hemikolektomie",        flags:["MRSA-positiv","Kontakt-Iso"], kind:"mrsa",    pg:3 },
+  { kuerzel:"Frau Schmidt",  sex:"w", alter:68, diag:"Chemotherapie Tag 3",           flags:["Immunsupprimiert"],           kind:"immun",   pg:3 },
+  { kuerzel:"Herr Weber",    sex:"m", alter:84, diag:"Palliativ, Tumorprogress",      flags:["Sterbebegleitung"],           kind:"sterb",   pg:5 },
+  { kuerzel:"Frau Becker",   sex:"w", alter:91, diag:"Demenz, Weglauftendenz",        flags:["Unruhe","Demenz"],            kind:"unruhig", pg:4 },
+  { kuerzel:"Herr Bauer",    sex:"m", alter:69, diag:"Colitis-Exazerbation",          flags:["C. difficile","Kontakt-Iso"], kind:"cdiff",   pg:3 },
+  { kuerzel:"Frau Krüger",   sex:"w", alter:58, diag:"Influenza A",                   flags:["Tröpfchen-Iso"],              kind:"tropf",   pg:2 },
+  { kuerzel:"Herr Fischer",  sex:"m", alter:71, diag:"VRE-Besiedlung",                flags:["VRE","Kontakt-Iso"],          kind:"vre",     pg:2 },
+  { kuerzel:"Frau Hoffmann", sex:"w", alter:79, diag:"Hüft-TEP Tag 2",                flags:["Mobilisation"],               kind:"stabil",  pg:2 },
+  { kuerzel:"Herr Lange",    sex:"m", alter:55, diag:"Bauchschmerzen, Abklärung",     flags:["Aufnahme"],                   kind:"stabil",  pg:1 },
+  { kuerzel:"Frau Neumann",  sex:"w", alter:82, diag:"Pneumonie, respiratorisch",     flags:["Sauerstoff"],                 kind:"stabil",  pg:3 },
+  { kuerzel:"Herr Schulz",   sex:"m", alter:67, diag:"Z. n. Stammzelltransplantation",flags:["Aplasie","Immunsupprimiert"], kind:"immun",   pg:4 },
+  { kuerzel:"Frau Richter",  sex:"w", alter:78, diag:"Herzinsuffizienz NYHA III",     flags:["Kardial"],                    kind:"stabil",  pg:3 },
+  { kuerzel:"Herr Klein",    sex:"m", alter:88, diag:"End-stage COPD",                flags:["Sterbebegleitung"],           kind:"sterb",   pg:5 },
+  { kuerzel:"Frau Wolf",     sex:"w", alter:74, diag:"Wundrose Unterschenkel",        flags:["MRSA-positiv","Kontakt-Iso"], kind:"mrsa",    pg:3 },
+  { kuerzel:"Herr Braun",    sex:"m", alter:63, diag:"Reizdarm, wässrige Diarrhoe",   flags:["Noro-Verdacht"],              kind:"noro",    pg:2 },
+  { kuerzel:"Frau Jung",     sex:"w", alter:86, diag:"Alzheimer-Demenz",              flags:["Unruhe","Ruft laut"],         kind:"unruhig", pg:4 },
+  { kuerzel:"Herr Horn",     sex:"m", alter:70, diag:"RSV-Infektion",                 flags:["Tröpfchen-Iso"],              kind:"tropf",   pg:2 },
+  { kuerzel:"Frau Meyer",    sex:"w", alter:64, diag:"Leukämie, Aplasie",             flags:["Immunsupprimiert","Aplasie"], kind:"immun",   pg:4 },
+  { kuerzel:"Herr Vogel",    sex:"m", alter:74, diag:"Hypertonie-Entgleisung",        flags:["Kardial"],                    kind:"stabil",  pg:1 },
+  // Junge Patient:innen (psychosozial relevant)
+  { kuerzel:"Herr Yılmaz",   sex:"m", alter:22, diag:"Bauchtrauma nach Sportunfall",    flags:["post-OP Tag 2"],            kind:"jung",    pg:1 },
+  { kuerzel:"Frau Nguyen",   sex:"w", alter:19, diag:"Appendizitis post-OP",            flags:["Mobilisation"],             kind:"jung",    pg:1 },
+  { kuerzel:"Herr Rossi",    sex:"m", alter:28, diag:"Kreuzbandriss post-OP",           flags:["post-OP Tag 3"],            kind:"jung",    pg:1 },
+  // 3MRGN (Standardhygiene)
+  { kuerzel:"Herr Al-Hassan",sex:"m", alter:66, diag:"Wundinfekt mit 3MRGN-Nachweis",   flags:["3MRGN","Standardhygiene"],  kind:"mrgn3",   pg:2 },
+  { kuerzel:"Frau Ivanova",  sex:"w", alter:68, diag:"Harnwegsinfekt · 3MRGN",          flags:["3MRGN"],                    kind:"mrgn3",   pg:2 },
+  // 4MRGN (strenge Kontakt-Iso)
+  { kuerzel:"Herr Kowalski", sex:"m", alter:71, diag:"Pneumonie mit 4MRGN",             flags:["4MRGN","Strenge Iso"],      kind:"mrgn4",   pg:3 },
+  { kuerzel:"Frau Öztürk",   sex:"w", alter:74, diag:"4MRGN-Besiedlung (Wunde)",        flags:["4MRGN","Strenge Iso"],      kind:"mrgn4",   pg:3 },
+  { kuerzel:"Frau Popović",  sex:"w", alter:83, diag:"Dekubitus III° · 4MRGN",          flags:["4MRGN","Strenge Iso"],      kind:"mrgn4",   pg:4 },
+  // Diverse zusätzliche Fälle
+  { kuerzel:"Frau Chen",     sex:"w", alter:45, diag:"Akute Cholezystitis",             flags:["Aufnahme"],                 kind:"stabil",  pg:1 },
+  { kuerzel:"Herr Diallo",   sex:"m", alter:55, diag:"Diabetes-Entgleisung",            flags:["Stoffwechsel"],             kind:"stabil",  pg:2 },
+  { kuerzel:"Frau Mensah",   sex:"w", alter:77, diag:"Hüft-TEP geplant",                flags:["Prä-OP"],                   kind:"stabil",  pg:2 },
+  { kuerzel:"Herr Kim",      sex:"m", alter:61, diag:"Obere GI-Blutung",                flags:["Kreislauf"],                kind:"stabil",  pg:2 },
+  { kuerzel:"Herr Tran",     sex:"m", alter:66, diag:"Akute Pankreatitis",              flags:["Schmerz","Aufnahme"],       kind:"stabil",  pg:3 },
+];
+
+/* ============================================================
+   ROOMMATE POOL
+   ============================================================ */
+// Station-Board Darstellung: Name + Alter/Sex + Diagnose + Iso-Status + PG
+// chips: [{ t: text, c: class }] — c in "" | "warn" | "alert" | "dark" | "ok" | "pg"
+function sxA(sex, age) { return `<span class="sex-ico">${sex === "m" ? "♂" : "♀"}</span> ${age} J`; }
+
+const ROOMMATES = {
+  empty_einzel: { empty:true, roomType:"Einzelzimmer",
+    chips:[{t:"Einzel",c:"ok"},{t:"frei",c:"ok"}] },
+  empty_doppel: { empty:true, roomType:"Doppelzimmer",
+    chips:[{t:"Doppel",c:"neutral"},{t:"2. Bett frei",c:"ok"}] },
+
+  rm_mrsa_m: { name:"Herr Klein", age:74, sex:"m", kind:"mrsa", pg:3,
+    line:"Herr Klein",
+    chips:[{t:sxA("m",74)},{t:"Z. n. Wundinfekt"},{t:"MRSA",c:"warn"},{t:"Kontakt-Iso",c:"warn"},{t:"PG 3",c:"pg"}] },
+  rm_mrsa_w: { name:"Frau Wolf", age:74, sex:"w", kind:"mrsa", pg:3,
+    line:"Frau Wolf",
+    chips:[{t:sxA("w",74)},{t:"Wundrose"},{t:"MRSA",c:"warn"},{t:"Kontakt-Iso",c:"warn"},{t:"PG 3",c:"pg"}] },
+  rm_noro_w: { name:"Frau Jung", age:86, sex:"w", kind:"noro", pg:4,
+    line:"Frau Jung",
+    chips:[{t:sxA("w",86)},{t:"Gastroenteritis"},{t:"Norovirus",c:"warn"},{t:"Kontakt-Iso",c:"warn"},{t:"PG 4",c:"pg"}] },
+  rm_noro_m: { name:"Herr Braun", age:63, sex:"m", kind:"noro", pg:2,
+    line:"Herr Braun",
+    chips:[{t:sxA("m",63)},{t:"Diarrhoe"},{t:"Norovirus",c:"warn"},{t:"Kontakt-Iso",c:"warn"},{t:"PG 2",c:"pg"}] },
+  rm_cdiff_m: { name:"Herr Braun", age:69, sex:"m", kind:"cdiff", pg:3,
+    line:"Herr Braun",
+    chips:[{t:sxA("m",69)},{t:"Colitis"},{t:"C. difficile",c:"warn"},{t:"Kontakt-Iso",c:"warn"},{t:"PG 3",c:"pg"}] },
+  rm_stable_m: { name:"Herr Vogel", age:74, sex:"m", kind:"stabil", pg:1,
+    line:"Herr Vogel",
+    chips:[{t:sxA("m",74)},{t:"Hypertonie, post-Stent"},{t:"PG 1",c:"pg"}] },
+  rm_stable_w: { name:"Frau Keller", age:71, sex:"w", kind:"stabil", pg:2,
+    line:"Frau Keller",
+    chips:[{t:sxA("w",71)},{t:"Hüft-TEP Tag 4"},{t:"PG 2",c:"pg"}] },
+  rm_stable_m2: { name:"Herr Roth", age:68, sex:"m", kind:"stabil", pg:1,
+    line:"Herr Roth",
+    chips:[{t:sxA("m",68)},{t:"Divertikulitis"},{t:"PG 1",c:"pg"}] },
+  rm_stable_w2: { name:"Frau Lehmann", age:73, sex:"w", kind:"stabil", pg:2,
+    line:"Frau Lehmann",
+    chips:[{t:sxA("w",73)},{t:"Herzinsuff. NYHA II"},{t:"PG 2",c:"pg"}] },
+  rm_immun_w: { name:"Frau Meyer", age:64, sex:"w", kind:"immun", pg:4,
+    line:"Frau Meyer",
+    chips:[{t:sxA("w",64)},{t:"Chemo Tag 8"},{t:"Aplasie",c:"alert"},{t:"immunsupprim.",c:"alert"},{t:"PG 4",c:"pg"}] },
+  rm_immun_m: { name:"Herr Wagner", age:67, sex:"m", kind:"immun", pg:4,
+    line:"Herr Wagner",
+    chips:[{t:sxA("m",67)},{t:"AML, Induktion"},{t:"Aplasie",c:"alert"},{t:"immunsupprim.",c:"alert"},{t:"PG 4",c:"pg"}] },
+  rm_sterb_m: { name:"Herr Roth", age:88, sex:"m", kind:"sterb", pg:5,
+    line:"Herr Roth",
+    chips:[{t:sxA("m",88)},{t:"CA, Palliativ"},{t:"Sterbebegleitung",c:"dark"},{t:"PG 5",c:"pg"}] },
+  rm_sterb_w: { name:"Frau Lehmann", age:84, sex:"w", kind:"sterb", pg:5,
+    line:"Frau Lehmann",
+    chips:[{t:sxA("w",84)},{t:"End-stage Herzinsuff."},{t:"Sterbebegleitung",c:"dark"},{t:"PG 5",c:"pg"}] },
+  rm_unruhig_m: { name:"Herr Otto", age:89, sex:"m", kind:"unruhig", pg:4,
+    line:"Herr Otto",
+    chips:[{t:sxA("m",89)},{t:"Alzheimer"},{t:"Weglauftendenz",c:"alert"},{t:"ruft laut",c:"alert"},{t:"PG 4",c:"pg"}] },
+  rm_unruhig_w: { name:"Frau Engel", age:87, sex:"w", kind:"unruhig", pg:4,
+    line:"Frau Engel",
+    chips:[{t:sxA("w",87)},{t:"Demenz"},{t:"nächtl. Unruhe",c:"alert"},{t:"PG 4",c:"pg"}] },
+  rm_tropf_m: { name:"Herr Horn", age:70, sex:"m", kind:"tropf", pg:2,
+    line:"Herr Horn",
+    chips:[{t:sxA("m",70)},{t:"RSV",c:"warn"},{t:"Tröpfchen-Iso",c:"warn"},{t:"PG 2",c:"pg"}] },
+  rm_tropf_w: { name:"Frau Ott", age:68, sex:"w", kind:"tropf", pg:2,
+    line:"Frau Ott",
+    chips:[{t:sxA("w",68)},{t:"Influenza A",c:"warn"},{t:"Tröpfchen-Iso",c:"warn"},{t:"PG 2",c:"pg"}] },
+  // Junge Mitbewohner:innen
+  rm_young_m: { name:"Herr Demir", age:23, sex:"m", kind:"jung", pg:1,
+    line:"Herr Demir",
+    chips:[{t:sxA("m",23)},{t:"Knieband-OP"},{t:"PG 1",c:"pg"}] },
+  rm_young_w: { name:"Frau Park", age:26, sex:"w", kind:"jung", pg:1,
+    line:"Frau Park",
+    chips:[{t:sxA("w",26)},{t:"Appendizitis Tag 3"},{t:"PG 1",c:"pg"}] },
+  // 3MRGN (Standardhygiene)
+  rm_mrgn3_m: { name:"Herr Al-Rahman", age:69, sex:"m", kind:"mrgn3", pg:2,
+    line:"Herr Al-Rahman",
+    chips:[{t:sxA("m",69)},{t:"Wundinfekt"},{t:"3MRGN",c:"alert"},{t:"PG 2",c:"pg"}] },
+  rm_mrgn3_w: { name:"Frau Sánchez", age:72, sex:"w", kind:"mrgn3", pg:2,
+    line:"Frau Sánchez",
+    chips:[{t:sxA("w",72)},{t:"HWI"},{t:"3MRGN",c:"alert"},{t:"PG 2",c:"pg"}] },
+  // 4MRGN (strenge Iso)
+  rm_mrgn4_m: { name:"Herr Johansson", age:71, sex:"m", kind:"mrgn4", pg:3,
+    line:"Herr Johansson",
+    chips:[{t:sxA("m",71)},{t:"Pneumonie"},{t:"4MRGN",c:"warn"},{t:"Strenge Iso",c:"warn"},{t:"PG 3",c:"pg"}] },
+  rm_mrgn4_w: { name:"Frau Jansen", age:75, sex:"w", kind:"mrgn4", pg:3,
+    line:"Frau Jansen",
+    chips:[{t:sxA("w",75)},{t:"4MRGN-Besiedlung"},{t:"4MRGN",c:"warn"},{t:"Strenge Iso",c:"warn"},{t:"PG 3",c:"pg"}] },
+};
+
+/* ============================================================
+   RULE CHECKER
+   ============================================================ */
+function checkPair(patient, option) {
+  const problems = [];
+  const rm = option.roommate;
+  if (!rm) return problems;
+
+  if (patient.kind === "mrsa" && rm.kind !== "mrsa")
+    problems.push("MRSA braucht Einzel- oder MRSA-Kohortenzimmer.");
+  if (patient.kind === "cdiff")
+    problems.push("C. difficile muss ins Einzelzimmer mit eigener Toilette.");
+  if (patient.kind === "noro" && rm.kind !== "noro")
+    problems.push("Noro braucht Einzel- oder Noro-Kohorte.");
+  if (patient.kind === "vre" && rm.kind !== "vre")
+    problems.push("VRE-Besiedlung – Kontaktisolation, nicht mit Nicht-VRE.");
+  if (patient.kind === "tropf" && rm.kind !== "tropf")
+    problems.push("Tröpfcheninfektion – Einzelzimmer oder Kohorte.");
+
+  // 4MRGN: wie MRSA, strenge Kontakt-Iso
+  if (patient.kind === "mrgn4" && rm.kind !== "mrgn4")
+    problems.push("4MRGN braucht Einzelzimmer oder 4MRGN-Kohorte (strenge Kontakt-Iso).");
+  // 3MRGN/4MRGN-Kreuzkombination vermeiden (Selektionsdruck)
+  if (patient.kind === "mrgn3" && rm.kind === "mrgn4")
+    problems.push("3MRGN nicht mit 4MRGN — Kreuzübertragungsrisiko.");
+  if (patient.kind === "mrgn4" && rm.kind === "mrgn3")
+    problems.push("4MRGN darf nicht mit 3MRGN zusammen — Selektionsdruck.");
+  // 3MRGN + Immunsupprimiert: Risiko
+  if (patient.kind === "mrgn3" && rm.kind === "immun")
+    problems.push("3MRGN nicht zu Immunsupprimierten — Infektionsrisiko trotz Standardhygiene.");
+  if (patient.kind === "immun" && rm.kind === "mrgn3")
+    problems.push("Immunsupprimierter nicht zu 3MRGN — Schutzbedürfnis.");
+
+  const infectKinds = ["mrsa","cdiff","noro","vre","tropf","mrgn4"];
+  if (patient.kind === "immun" && infectKinds.includes(rm.kind))
+    problems.push("Immunsupprimierter darf nicht neben Infektiösen – lebensgefährlich.");
+  if (infectKinds.includes(patient.kind) && rm.kind === "immun")
+    problems.push("Immunsupprimierter Nachbar – Infektion darf nicht dorthin.");
+
+  if (patient.kind === "sterb" && rm.kind === "unruhig")
+    problems.push("Sterbebegleitung neben unruhigem Patienten ist nicht zumutbar.");
+  if (patient.kind === "unruhig" && rm.kind === "sterb")
+    problems.push("Unruhiger Patient darf Sterbebegleitung nicht stören.");
+  if (patient.kind === "sterb")
+    problems.push("Sterbebegleitung gehört nach Möglichkeit ins Einzelzimmer.");
+
+  // Psychosozialer Altersgap: junger Mensch (<30) neben palliativ/demenz
+  if (patient.alter < 30 && (rm.kind === "sterb" || rm.kind === "unruhig")) {
+    problems.push("Psychosozial unzumutbar: junge:r Patient:in neben " + (rm.kind === "sterb" ? "Sterbebegleitung" : "Demenz/Unruhe") + ".");
+  }
+  if ((patient.kind === "sterb" || patient.kind === "unruhig") && rm.age && rm.age < 30) {
+    problems.push("Psychosozial unpassend: " + (patient.kind === "sterb" ? "Sterbebegleitung" : "Demenz/Unruhe") + " neben jungem Mitbewohner.");
+  }
+  // Sehr großer Altersabstand bei sonst vergleichbarer Lage (>55 Jahre Differenz)
+  if (rm.age && Math.abs(patient.alter - rm.age) >= 55 && !problems.length) {
+    problems.push("Großer Altersunterschied von " + Math.abs(patient.alter - rm.age) + " Jahren — soziale Situation bedenken.");
+  }
+
+  if (rm.sex && patient.sex !== rm.sex)
+    problems.push("Gemischtgeschlechtliche Belegung im Doppelzimmer.");
+
+  return problems;
+}
+
+/* ============================================================
+   QUESTION GENERATOR
+   ============================================================ */
+let roomCounter = 100;
+function nextRoom() { roomCounter++; return `Zi ${roomCounter}`; }
+
+function makeOption(label, roommateKey) {
+  const meta = ROOMMATES[roommateKey];
+  if (meta.empty) {
+    return {
+      label: label,
+      roomType: meta.roomType,
+      empty: true,
+      roommate: null,
+      chips: meta.chips,
+      _correct: false
+    };
+  }
+  return {
+    label: label + " · Bett 2",
+    roomType: "Doppelzimmer",
+    empty: false,
+    roommate: meta,
+    chips: meta.chips,
+    _correct: false
+  };
+}
+
+function generateQuestion(patient) {
+  roomCounter = 100 + Math.floor(Math.random() * 40); // randomize starting room
+  const k = patient.kind;
+  const sx = patient.sex;
+
+  let correctOption;
+  if (k === "mrsa") {
+    correctOption = makeOption(nextRoom(), sx === "m" ? "rm_mrsa_m" : "rm_mrsa_w");
+  } else if (k === "mrgn4") {
+    // Wie MRSA — Einzel oder 4MRGN-Kohorte
+    if (Math.random() < 0.5) {
+      correctOption = makeOption(nextRoom(), sx === "m" ? "rm_mrgn4_m" : "rm_mrgn4_w");
+    } else {
+      correctOption = makeOption(nextRoom(), "empty_einzel");
+    }
+  } else if (k === "mrgn3") {
+    // 3MRGN: Standardhygiene, normales Doppel mit stable ist ok
+    const r = Math.random();
+    if (r < 0.4) {
+      correctOption = makeOption(nextRoom(), sx === "m" ? "rm_stable_m" : "rm_stable_w");
+    } else if (r < 0.7) {
+      correctOption = makeOption(nextRoom(), sx === "m" ? "rm_mrgn3_m" : "rm_mrgn3_w");
+    } else {
+      correctOption = makeOption(nextRoom(), "empty_einzel");
+    }
+  } else if (k === "jung") {
+    // Jung: anderer Junge oder stable Mittel-alter, gleiches Geschlecht
+    if (Math.random() < 0.5) {
+      correctOption = makeOption(nextRoom(), sx === "m" ? "rm_young_m" : "rm_young_w");
+    } else {
+      const poolKeys = sx === "m" ? ["rm_stable_m", "rm_stable_m2"] : ["rm_stable_w", "rm_stable_w2"];
+      correctOption = makeOption(nextRoom(), poolKeys[Math.floor(Math.random() * poolKeys.length)]);
+    }
+  } else if (k === "noro") {
+    if (Math.random() < 0.5) {
+      correctOption = makeOption(nextRoom(), sx === "w" ? "rm_noro_w" : "rm_noro_m");
+    } else {
+      correctOption = makeOption(nextRoom(), "empty_einzel");
+    }
+  } else if (k === "cdiff" || k === "vre" || k === "tropf" || k === "sterb") {
+    correctOption = makeOption(nextRoom(), "empty_einzel");
+  } else if (k === "immun") {
+    if (Math.random() < 0.5) {
+      correctOption = makeOption(nextRoom(), sx === "m" ? "rm_stable_m" : "rm_stable_w");
+    } else {
+      correctOption = makeOption(nextRoom(), "empty_einzel");
+    }
+  } else if (k === "unruhig") {
+    correctOption = makeOption(nextRoom(), sx === "m" ? "rm_stable_m" : "rm_stable_w");
+  } else {
+    const poolKeys = sx === "m" ? ["rm_stable_m", "rm_stable_m2"] : ["rm_stable_w", "rm_stable_w2"];
+    correctOption = makeOption(nextRoom(), poolKeys[Math.floor(Math.random() * poolKeys.length)]);
+  }
+  correctOption._correct = true;
+
+  // Four wrong options per kind
+  const sameStableKey  = sx === "m" ? "rm_stable_m"  : "rm_stable_w";
+  const sameStableKey2 = sx === "m" ? "rm_stable_m2" : "rm_stable_w2";
+  const oppSexKey      = sx === "m" ? "rm_stable_w"  : "rm_stable_m";
+  const sameImmunKey   = sx === "m" ? "rm_immun_m"   : "rm_immun_w";
+  const sameTropfKey   = sx === "m" ? "rm_tropf_m"   : "rm_tropf_w";
+  const sameNoroKey    = sx === "w" ? "rm_noro_w"    : "rm_noro_m";
+  const sameUnruhigKey = sx === "m" ? "rm_unruhig_m" : "rm_unruhig_w";
+  const sameSterbKey   = sx === "m" ? "rm_sterb_m"   : "rm_sterb_w";
+  const sameMrsaKey    = sx === "m" ? "rm_mrsa_m"    : "rm_mrsa_w";
+  const sameMrgn3Key   = sx === "m" ? "rm_mrgn3_m"   : "rm_mrgn3_w";
+  const sameMrgn4Key   = sx === "m" ? "rm_mrgn4_m"   : "rm_mrgn4_w";
+  const sameYoungKey   = sx === "m" ? "rm_young_m"   : "rm_young_w";
+  const wrongKeys = [];
+
+  if (k === "mrsa") {
+    wrongKeys.push(sameNoroKey, sameStableKey, sameImmunKey, sameMrgn4Key);
+  } else if (k === "mrgn4") {
+    // Wie MRSA — falsch: stable, immun, mrgn3 (Kreuzkombi), mrsa (andere Organismen)
+    wrongKeys.push(sameStableKey, sameImmunKey, sameMrgn3Key, sameMrsaKey);
+  } else if (k === "mrgn3") {
+    // 3MRGN: Standardhygiene reicht, aber NICHT zu Immun, 4MRGN, anderen Infekten
+    wrongKeys.push(sameImmunKey, sameMrgn4Key, sameMrsaKey, sameSterbKey);
+  } else if (k === "jung") {
+    // Jung: falsch bei Sterbebegleitung/Demenz (psychosozial), gegenteiligem Sex, altem Immun
+    wrongKeys.push(sameSterbKey, sameUnruhigKey, oppSexKey, sameImmunKey);
+  } else if (k === "noro") {
+    wrongKeys.push(sameImmunKey, sameStableKey, sameMrsaKey, sameSterbKey);
+  } else if (k === "cdiff") {
+    wrongKeys.push(sameStableKey, sameImmunKey, sameMrsaKey, sameSterbKey);
+  } else if (k === "vre") {
+    wrongKeys.push(sameStableKey, sameImmunKey, sameMrsaKey, sameUnruhigKey);
+  } else if (k === "tropf") {
+    wrongKeys.push(sameImmunKey, sameStableKey, sameMrsaKey, sameSterbKey);
+  } else if (k === "immun") {
+    wrongKeys.push(sameMrsaKey, sameNoroKey, sameMrgn4Key, sameMrgn3Key);
+  } else if (k === "sterb") {
+    wrongKeys.push(sameUnruhigKey, sameStableKey, sameMrsaKey, sameYoungKey);
+  } else if (k === "unruhig") {
+    wrongKeys.push(sameSterbKey, oppSexKey, sameImmunKey, sameYoungKey);
+  } else {
+    // stabil
+    wrongKeys.push(oppSexKey, sameMrsaKey, sameSterbKey, sameMrgn4Key);
+  }
+
+  const wrongOptions = wrongKeys.slice(0, 4).map(key => {
+    const opt = makeOption(nextRoom(), key);
+    opt._correct = false;
+    return opt;
+  });
+
+  const options = [correctOption, ...wrongOptions];
+  options.sort(() => Math.random() - 0.5);
+  return options;
+}
+
+function renderEventRound(evState) {
+  const { ev, target, pool } = evState;
+  const card = document.getElementById("patientCard");
+  card.classList.remove("golden");
+  card.classList.add("is-event");
+  card.style.transform = "";
+  card.innerHTML = `
+    <div class="event-label">${ev.label}</div>
+    <div class="event-question">${ev.q}</div>
+  `;
+
+  document.getElementById("optionsContainer").innerHTML = pool.map((p, i) => {
+    const sx = p.sex === "m" ? "♂" : "♀";
+    const chips = [{t:`<span class="sex-ico">${sx}</span> ${p.alter} J`, c:""}];
+    p.flags.forEach(f => {
+      let c = "";
+      if (/^4MRGN|Strenge Iso/i.test(f) || /MRSA|difficile|Noro|VRE|Tröpfchen|Influenza|RSV/i.test(f)) c = "warn";
+      else if (/3MRGN|Standardhygiene|Immun|Aplasie|Demenz|Unruhe|Ruft/i.test(f)) c = "alert";
+      else if (/Sterbe/i.test(f)) c = "dark";
+      chips.push({t:f, c});
+    });
+    chips.push({t:p.bloodGroup, c:"neutral"});
+    chips.push({t:`Aufn. ${p.admTime}`, c:"neutral"});
+    chips.push({t:`PG ${p.pg}`, c:"pg"});
+    const chipsHtml = chips.map(c => `<span class="mini-chip ${c.c}">${c.t}</span>`).join("");
+    return `
+      <button class="option" data-idx="${i}">
+        <div class="opt-body">
+          <div class="opt-top">Zi ${p.roomNum} · ${p.diag}</div>
+          <div class="opt-main">${p.kuerzel}</div>
+          <div class="mini-chips">${chipsHtml}</div>
+        </div>
+      </button>
+    `;
+  }).join("");
+
+  document.getElementById("feedbackBox").classList.remove("visible", "ok", "bad");
+
+  document.querySelectorAll(".option").forEach(btn => {
+    btn.addEventListener("click", () => pickEventOption(parseInt(btn.dataset.idx, 10), btn));
+  });
+}
+
+function pickEventOption(idx, btn) {
+  if (state.locked) return;
+  state.locked = true;
+
+  const { target, pool } = state.currentEvent;
+  const picked = pool[idx];
+  const isCorrect = picked === target;
+
+  if (isCorrect) {
+    state.correctCount++;
+    state.streak++;
+    if (state.streak > state.bestStreak) state.bestStreak = state.streak;
+    let points = 10;
+    if (state.streak >= 3) points += Math.min(15, (state.streak - 2) * 3);
+    if (state.rushRounds > 0) points *= RUSH_POINTS_MULT;
+    state.score += points;
+    state.xpGained += 1;
+    state.timeLeft = Math.min(TIME_START, state.timeLeft + TIME_BONUS);
+    const rect = btn.getBoundingClientRect();
+    floatScore(rect.left + rect.width/2, rect.top, `+${points}`, "plus");
+    floatScore(rect.left + rect.width/2, rect.top + 30, `+${TIME_BONUS.toFixed(0)}s`, "plus");
+    snd.correct();
+    checkBonusTriggers();
+  } else {
+    state.wrongCount++;
+    state.streak = 0;
+    state.kaffeepauseTriggeredAtStreak = -1;
+    state.rushTriggeredAtStreak = -1;
+    state.schwarmTriggeredAtStreak = -1;
+    state.timeLeft = Math.max(0, state.timeLeft - TIME_PENALTY);
+    const rect = btn.getBoundingClientRect();
+    floatScore(rect.left + rect.width/2, rect.top, `−${TIME_PENALTY.toFixed(0)}s`, "minus");
+    snd.wrong();
+  }
+
+  document.querySelectorAll(".option").forEach((el, i) => {
+    el.classList.add("disabled");
+    if (pool[i] === target) el.classList.add("correct");
+    if (i === idx && pool[i] !== target) el.classList.add("wrong");
+  });
+
+  const fb = document.getElementById("feedbackBox");
+  fb.classList.remove("ok", "bad");
+  if (isCorrect) {
+    fb.classList.add("ok", "visible");
+    fb.innerHTML = `<strong>✓ Richtig</strong>${target.kuerzel} · ${target.alter} J · ${target.diag}`;
+  } else {
+    fb.classList.add("bad", "visible");
+    fb.innerHTML = `<strong>✗ Falsch</strong>Gesucht war: ${target.kuerzel} (${target.diag})`;
+  }
+
+  if (state.rushRounds > 0) state.rushRounds--;
+  if (state.schwarmRounds > 0) state.schwarmRounds--;
+
+  updateTopbar();
+  renderTimer();
+
+  const delay = isCorrect ? FEEDBACK_OK : FEEDBACK_BAD;
+  setTimeout(() => {
+    if (!state || state.timeLeft <= 0) return;
+    nextRound();
+  }, delay);
+}
+
+function getCorrectReason(patient, option) {
+  const k = patient.kind;
+  if (k === "mrsa" && !option.roommate) return "MRSA-Patient ins Einzelzimmer – Kontaktisolation korrekt.";
+  if (k === "mrsa") return "MRSA-Kohorte erlaubt, solange nur MRSA-Patienten zusammenliegen.";
+  if (k === "mrgn4" && !option.roommate) return "4MRGN wie MRSA ins Einzelzimmer – strenge Kontakt-Iso.";
+  if (k === "mrgn4") return "4MRGN-Kohorte ist zulässig bei strikter Einhaltung der Iso.";
+  if (k === "mrgn3" && option.roommate && option.roommate.kind === "mrgn3") return "3MRGN-Kohorte ist zulässig – Standardhygiene reicht.";
+  if (k === "mrgn3" && option.roommate) return "3MRGN auf Normalstation — Standardhygiene ist ausreichend, kein Einzelzimmer nötig.";
+  if (k === "mrgn3") return "Einzelzimmer bei 3MRGN ist möglich, aber nicht zwingend — Standardhygiene reicht.";
+  if (k === "jung" && option.roommate && option.roommate.kind === "jung") return "Junge Patient:innen zusammen — psychosozial ideal.";
+  if (k === "jung") return "Junge:r Patient:in neben stabilem Mitbewohner ähnlichen Alters — passt.";
+  if (k === "noro") return "Noro-Isolation umgesetzt – keine Gefahr für andere.";
+  if (k === "cdiff") return "C. difficile braucht zwingend Einzelzimmer mit eigener Toilette.";
+  if (k === "vre") return "VRE-Besiedlung – Einzelzimmer ist sicher.";
+  if (k === "tropf") return "Tröpfchenisolation sauber – andere Patienten geschützt.";
+  if (k === "immun" && option.roommate) return "Immunsupprimierter neben stabilem Mitbewohner – passt.";
+  if (k === "immun") return "Einzelzimmer ist die sicherste Option für Immunsupprimierte.";
+  if (k === "sterb") return "Sterbebegleitung im Einzelzimmer – würdig.";
+  if (k === "unruhig") return "Unruhiger Patient neben stabilem Mitbewohner – sozial tragbar.";
+  return "Gute Wahl – keine Regel verletzt.";
+}
+
+/* ============================================================
+   GAME STATE · ENDLESS MODE
+   ============================================================ */
+const TIME_START        = 65.0;  // Start-Sekunden
+const TIME_BONUS        = 7.0;   // pro richtig
+const TIME_PENALTY      = 3.0;   // pro falsch
+const TIME_DRAIN_RATE   = 0.7;   // Timer läuft 30 % langsamer als Echtzeit
+const FEEDBACK_OK   = 1600;  // ms Feedback bei richtig
+const FEEDBACK_BAD  = 2800;  // ms Feedback bei falsch (länger zum Lesen)
+const HS_KEY        = "noch-ein-bett-highscore";
+const XP_KEY        = "noch-ein-bett-xp";
+
+// Stationskarriere-Level
+const LEVELS = [
+  { xp: 0,    name: "Auszubildende:r 1. Jahr" },
+  { xp: 50,   name: "Auszubildende:r 2. Jahr" },
+  { xp: 150,  name: "Auszubildende:r 3. Jahr" },
+  { xp: 350,  name: "Pflegefachkraft" },
+  { xp: 700,  name: "Praxisanleitung" },
+  { xp: 1500, name: "Stationsleitung" },
+  { xp: 3000, name: "Pflegedirektion" },
+];
+function getLevel(xp) {
+  for (let i = LEVELS.length - 1; i >= 0; i--) {
+    if (xp >= LEVELS[i].xp) return { ...LEVELS[i], idx: i, next: LEVELS[i+1] || null };
+  }
+  return { ...LEVELS[0], idx: 0, next: LEVELS[1] };
+}
+function getXp() {
+  try { return parseInt(localStorage.getItem(XP_KEY), 10) || 0; } catch(e) { return 0; }
+}
+function saveXp(v) {
+  try { localStorage.setItem(XP_KEY, String(v)); } catch(e) {}
+}
+
+// Bonus-Events
+const GOLDEN_CHANCE     = 0.03;   // 3% pro Runde
+const GOLDEN_POINTS_X   = 3;      // Punkte-Faktor
+const GOLDEN_TIME_BONUS = 10;     // Sekunden statt normalem Bonus
+const KAFFEEPAUSE_TRIGGER_STREAK = 10;
+const KAFFEEPAUSE_DURATION       = 5000;  // ms
+const RUSH_TRIGGER_STREAK    = 12;
+const RUSH_ROUNDS            = 3;
+const RUSH_POINTS_MULT       = 2;
+const RUSH_TIME_MULT         = 2;    // Timer läuft 2× so schnell
+const SCHWARM_TRIGGER_STREAK = 15;
+const SCHWARM_ROUNDS         = 5;
+const ISO_KINDS              = ["mrsa","cdiff","noro","vre","tropf","mrgn4"];
+const EVENT_CHANCE           = 0.14;  // Identifikations-Event-Chance pro Runde
+const PERSONAL_CHANCE        = 0.05;  // Personalausfall-Chance pro Runde
+const PERSONAL_PENALTY       = 2;     // Sekunden Abzug bei Personalausfall
+
+/* Zufalls-Pools für Event-Patient:innen */
+const SURNAMES = [
+  "Müller","Schmidt","Weber","Fischer","Becker","Klein","Braun","Vogel","Horn","Wagner",
+  "Hoffmann","Keller","Meyer","Otto","Roth","Lange","Lehmann","Wolf","Krüger","Neumann",
+  "Richter","Schulz","Bauer","Jung","Winkler","Koch","Schuster","Eckert","Baier","Scholz",
+  "Yılmaz","Öztürk","Demir","Koç","Aydın","Kaya","Erdoğan","Çelik",
+  "Kowalski","Nowak","Wójcik","Lewandowski","Jankowski",
+  "Al-Hassan","Al-Rahman","Haddad","Karimi","El-Sayed","Nazari","Haidari",
+  "Ivanova","Petrov","Popović","Marković","Sokolov","Volkov",
+  "Nguyen","Tran","Le","Pham","Park","Kim","Chen","Lee","Tanaka","Wong",
+  "Rossi","Ferrari","Ricci","Romano","Bianchi","Esposito",
+  "Okonkwo","Mensah","Diallo","Osei","Nkrumah",
+  "Fernández","Sánchez","García","Pérez","Oliveira","Silva","Santos",
+  "Johansson","Jansen","Papadopoulos","Dubois","Lefebvre"
+];
+
+const DIAGS = [
+  { kind:"stabil",  text:"Hypertonie-Entgleisung",        flags:["Kardial"] },
+  { kind:"stabil",  text:"Hüft-TEP Tag 2",                flags:["Mobilisation"] },
+  { kind:"stabil",  text:"Akute Cholezystitis",           flags:["Aufnahme"] },
+  { kind:"stabil",  text:"Diabetes-Entgleisung",          flags:["Stoffwechsel"] },
+  { kind:"stabil",  text:"COPD-Exazerbation",             flags:["Sauerstoff"] },
+  { kind:"stabil",  text:"Akute Pankreatitis",            flags:["Schmerz"] },
+  { kind:"stabil",  text:"Pneumonie",                     flags:["Antibiose"] },
+  { kind:"stabil",  text:"Z. n. Schlaganfall",            flags:["Neuro"] },
+  { kind:"stabil",  text:"Herzinsuffizienz NYHA III",     flags:["Kardial"] },
+  { kind:"stabil",  text:"Obere GI-Blutung",              flags:["Kreislauf"] },
+  { kind:"stabil",  text:"Appendizitis post-OP",          flags:["post-OP"] },
+  { kind:"stabil",  text:"Nierenstein-Kolik",             flags:["Schmerz"] },
+  { kind:"stabil",  text:"Pyelonephritis",                flags:["Infektion"] },
+  { kind:"stabil",  text:"Z. n. Mastektomie",             flags:["post-OP"] },
+  { kind:"jung",    text:"Kreuzbandriss post-OP",         flags:["post-OP Tag 3"] },
+  { kind:"jung",    text:"Bauchtrauma Sportunfall",       flags:["post-OP Tag 2"] },
+  { kind:"jung",    text:"Appendizitis post-OP",          flags:["Mobilisation"] },
+  { kind:"mrsa",    text:"Wundinfekt mit MRSA",           flags:["MRSA-positiv","Kontakt-Iso"] },
+  { kind:"mrsa",    text:"Post-OP MRSA-Besiedlung",       flags:["MRSA-positiv","Kontakt-Iso"] },
+  { kind:"mrsa",    text:"Ulkus mit MRSA",                flags:["MRSA-positiv","Kontakt-Iso"] },
+  { kind:"cdiff",   text:"Colitis-Exazerbation",          flags:["C. difficile","Kontakt-Iso"] },
+  { kind:"cdiff",   text:"C. difficile-Rezidiv",          flags:["C. difficile","Kontakt-Iso"] },
+  { kind:"noro",    text:"Akute Gastroenteritis",         flags:["NORO-Verdacht"] },
+  { kind:"noro",    text:"Wässrige Diarrhoe",             flags:["NORO-Verdacht"] },
+  { kind:"vre",     text:"VRE-Besiedlung",                flags:["VRE","Kontakt-Iso"] },
+  { kind:"tropf",   text:"Influenza A",                   flags:["Tröpfchen-Iso"] },
+  { kind:"tropf",   text:"RSV-Infektion",                 flags:["Tröpfchen-Iso"] },
+  { kind:"immun",   text:"Chemotherapie Tag 3",           flags:["Immunsupprimiert"] },
+  { kind:"immun",   text:"Leukämie-Aplasie",              flags:["Immunsupprimiert","Aplasie"] },
+  { kind:"sterb",   text:"Palliativ, Tumorprogress",      flags:["Sterbebegleitung"] },
+  { kind:"sterb",   text:"End-stage COPD",                flags:["Sterbebegleitung"] },
+  { kind:"unruhig", text:"Demenz, Weglauftendenz",        flags:["Unruhe","Demenz"] },
+  { kind:"unruhig", text:"Alzheimer",                     flags:["Unruhe","Ruft laut"] },
+  { kind:"mrgn3",   text:"Harnwegsinfekt 3MRGN",          flags:["3MRGN","Standardhygiene"] },
+  { kind:"mrgn3",   text:"Wundinfekt 3MRGN",              flags:["3MRGN"] },
+  { kind:"mrgn4",   text:"Pneumonie mit 4MRGN",           flags:["4MRGN","Strenge Iso"] },
+  { kind:"mrgn4",   text:"4MRGN-Besiedlung",              flags:["4MRGN","Strenge Iso"] },
+];
+
+const BLOOD_GROUPS = ["A+","A−","0+","0−","B+","B−","AB+","AB−"];
+const ADM_TIMES    = ["06:45","07:30","08:00","08:45","09:15","10:20","11:40","13:10","14:20","16:10","18:45","20:30","22:15"];
+
+function generatePatientFromDiag(d) {
+  const surname = SURNAMES[Math.floor(Math.random() * SURNAMES.length)];
+  const sex = Math.random() < 0.5 ? "m" : "w";
+  const prefix = sex === "m" ? "Herr" : "Frau";
+  let age;
+  if (d.kind === "jung")         age = 18 + Math.floor(Math.random() * 12);
+  else if (d.kind === "sterb")   age = 72 + Math.floor(Math.random() * 20);
+  else if (d.kind === "unruhig") age = 78 + Math.floor(Math.random() * 15);
+  else                           age = 45 + Math.floor(Math.random() * 45);
+  let pg;
+  if (d.kind === "stabil")       pg = 1 + Math.floor(Math.random() * 2);
+  else if (d.kind === "jung")    pg = 1;
+  else if (d.kind === "sterb")   pg = 5;
+  else if (d.kind === "unruhig") pg = 4;
+  else if (d.kind === "immun")   pg = 3 + Math.floor(Math.random() * 2);
+  else                           pg = 2 + Math.floor(Math.random() * 2);
+  return {
+    kuerzel: `${prefix} ${surname}`,
+    sex, alter: age,
+    diag: d.text,
+    flags: d.flags,
+    kind: d.kind,
+    pg,
+    bloodGroup: BLOOD_GROUPS[Math.floor(Math.random() * BLOOD_GROUPS.length)],
+    admTime: ADM_TIMES[Math.floor(Math.random() * ADM_TIMES.length)],
+    roomNum: 100 + Math.floor(Math.random() * 40)
+  };
+}
+
+function generateRandomPatient() {
+  return generatePatientFromDiag(DIAGS[Math.floor(Math.random() * DIAGS.length)]);
+}
+
+/* Identifikations-Events: 5 Patient-Karten, eine richtige Antwort
+   Auswahl so, dass jede:r der 5 aus einem anderen Krankheitsbild kommt */
+function makeIdentificationEvent() {
+  const byKind = {};
+  DIAGS.forEach(d => {
+    if (!byKind[d.kind]) byKind[d.kind] = [];
+    byKind[d.kind].push(d);
+  });
+  const kinds = Object.keys(byKind).sort(() => Math.random() - 0.5).slice(0, 5);
+  const pool = kinds.map(k => {
+    const d = byKind[k][Math.floor(Math.random() * byKind[k].length)];
+    return generatePatientFromDiag(d);
+  }).sort(() => Math.random() - 0.5);
+  const target = pool[Math.floor(Math.random() * pool.length)];
+
+  const events = [
+    {
+      label: "Angehörige an der Tür",
+      q: `Angehörige fragen an der Tür nach ${target.kuerzel} — welche:r Patient:in ist das?`
+    },
+    {
+      label: "Blutabnahme fällig",
+      q: `8:00 Uhr Blutabnahme bei ${target.kuerzel} — welche:r Patient:in?`
+    },
+    {
+      label: "Klingelalarm",
+      q: `${target.kuerzel} klingelt nach Hilfe — wer ist das?`
+    },
+    {
+      label: "Visite",
+      q: `Chefarzt will zu ${target.kuerzel} — welcher Patient?`
+    },
+    {
+      label: "Telefon-Anfrage",
+      q: `Am Telefon Hausarzt für ${target.kuerzel} — wer ist gemeint?`
+    },
+    {
+      label: "Sono-Untersuchung",
+      q: `Oberärztin will Sono beim Fall mit "${target.diag}" — welche:r Patient:in?`
+    },
+  ];
+
+  // Kontext-spezifische Events
+  if (target.kind === "mrgn4") {
+    events.push({
+      label: "Antibiotika-Gabe",
+      q: `14:00 Piperacillin für den 4MRGN-Fall auf Station — wer bekommt's?`
+    });
+  }
+  if (/Diabetes/i.test(target.diag)) {
+    events.push({
+      label: "Diät-Verteilung",
+      q: `Diabetes-Kost auf dem Tablett — welche:r Patient:in bekommt sie?`
+    });
+  }
+  if (target.kind === "immun") {
+    events.push({
+      label: "Spezialkost",
+      q: `Keimarme Kost — welcher immunsupprimierte Patient?`
+    });
+  }
+
+  const ev = events[Math.floor(Math.random() * events.length)];
+  return { ev, target, pool };
+}
+
+let state = null;
+let timerIntervalId = null;
+
+function getHighscore() {
+  try { return parseInt(localStorage.getItem(HS_KEY), 10) || 0; } catch(e) { return 0; }
+}
+function saveHighscore(v) {
+  try { localStorage.setItem(HS_KEY, String(v)); } catch(e) {}
+}
+
+function newGame() {
+  state = {
+    timeLeft: TIME_START,
+    score: 0,
+    correctCount: 0,
+    wrongCount: 0,
+    streak: 0,
+    bestStreak: 0,
+    startTs: Date.now(),
+    locked: false,
+    currentPatient: null,
+    currentOptions: null,
+    // Bonus-Events
+    rushRounds: 0,
+    schwarmRounds: 0,
+    goldenThisRound: false,
+    currentEvent: null,
+    kaffeepauseTriggeredAtStreak: -1,
+    rushTriggeredAtStreak: -1,
+    schwarmTriggeredAtStreak: -1,
+    // XP
+    xpStart: getXp(),
+    xpGained: 0,
+  };
+  showScreen("quizScreen");
+  updateTopbar();
+  nextRound();
+  startTimer();
+  snd.bell();
+}
+
+function startTimer() {
+  stopTimer();
+  state._lastTick = performance.now();
+  timerIntervalId = setInterval(tick, 100);
+}
+function stopTimer() {
+  if (timerIntervalId) { clearInterval(timerIntervalId); timerIntervalId = null; }
+}
+function tick() {
+  if (!state || state.paused) { state._lastTick = performance.now(); return; }
+  const now = performance.now();
+  const dt = (now - state._lastTick) / 1000;
+  state._lastTick = now;
+  const mult = state.rushRounds > 0 ? RUSH_TIME_MULT : 1;
+  state.timeLeft = Math.max(0, state.timeLeft - dt * mult * TIME_DRAIN_RATE);
+  renderTimer();
+  if (state.timeLeft <= 0) {
+    stopTimer();
+    endGame("time");
+  }
+}
+
+function checkBonusTriggers() {
+  if (state.streak === KAFFEEPAUSE_TRIGGER_STREAK && state.kaffeepauseTriggeredAtStreak !== KAFFEEPAUSE_TRIGGER_STREAK) {
+    state.kaffeepauseTriggeredAtStreak = KAFFEEPAUSE_TRIGGER_STREAK;
+    doKaffeepause();
+  }
+  if (state.streak === RUSH_TRIGGER_STREAK && state.rushTriggeredAtStreak !== RUSH_TRIGGER_STREAK) {
+    state.rushRounds = RUSH_ROUNDS + 1; // +1 weil wir am Ende dieser Runde sofort dekrementieren
+    state.rushTriggeredAtStreak = RUSH_TRIGGER_STREAK;
+    showTriggerBanner("⚡ AUFNAHME-RUSH", `${RUSH_ROUNDS} Runden · doppelte Punkte · halbe Zeit`, "rush");
+  }
+  if (state.streak === SCHWARM_TRIGGER_STREAK && state.schwarmTriggeredAtStreak !== SCHWARM_TRIGGER_STREAK) {
+    state.schwarmRounds = SCHWARM_ROUNDS + 1;
+    state.schwarmTriggeredAtStreak = SCHWARM_TRIGGER_STREAK;
+    showTriggerBanner("🎯 INFEKT-SCHWARM", `${SCHWARM_ROUNDS} Iso-Fälle in Folge`, "schwarm");
+  }
+}
+
+function doKaffeepause() {
+  state.paused = true;
+  showTriggerBanner("☕ KAFFEEPAUSE", `Timer pausiert ${KAFFEEPAUSE_DURATION/1000} Sekunden`, "pause");
+  setTimeout(() => { if (state) state.paused = false; }, KAFFEEPAUSE_DURATION);
+}
+
+function showTriggerBanner(title, subtitle, cls) {
+  const banner = document.createElement("div");
+  banner.className = "trigger-banner " + cls;
+  banner.innerHTML = `<div class="tb-title">${title}</div><div class="tb-sub">${subtitle}</div>`;
+  document.body.appendChild(banner);
+  snd.streak();
+  setTimeout(() => banner.classList.add("fade-out"), 1400);
+  setTimeout(() => banner.remove(), 1900);
+}
+
+function renderTimer() {
+  const pct = Math.max(0, Math.min(100, (state.timeLeft / TIME_START) * 100));
+  const fill = document.getElementById("timerBarFill");
+  fill.style.width = pct + "%";
+  fill.classList.toggle("warn", state.timeLeft < 8 && state.timeLeft >= 4);
+  fill.classList.toggle("critical", state.timeLeft < 4);
+  document.getElementById("timerLabel").textContent = state.timeLeft.toFixed(1);
+}
+
+function updateTopbar() {
+  document.getElementById("scoreDisplay").textContent = state.score;
+  const chip = document.getElementById("streakChip");
+  if (state.streak >= 3) {
+    chip.textContent = "🔥 " + state.streak;
+    chip.classList.add("visible");
+  } else {
+    chip.classList.remove("visible");
+  }
+  const rushChip = document.getElementById("rushChip");
+  if (state.rushRounds > 0) {
+    rushChip.textContent = `⚡ RUSH ${state.rushRounds}`;
+    rushChip.style.display = "inline-block";
+  } else {
+    rushChip.style.display = "none";
+  }
+  const schwarmChip = document.getElementById("schwarmChip");
+  if (state.schwarmRounds > 0) {
+    schwarmChip.textContent = `🎯 ISO ${state.schwarmRounds}`;
+    schwarmChip.style.display = "inline-block";
+  } else {
+    schwarmChip.style.display = "none";
+  }
+}
+
+function nextRound() {
+  // Events nur nach Aufwärmphase und nicht während Rush/Schwarm
+  const canEvent = state.correctCount >= 3 && state.rushRounds === 0 && state.schwarmRounds === 0;
+
+  // Personalausfall — einmaliger Zeitabzug
+  if (canEvent && Math.random() < PERSONAL_CHANCE) {
+    state.timeLeft = Math.max(0, state.timeLeft - PERSONAL_PENALTY);
+    showTriggerBanner("Personalausfall", `Kollegin krank · −${PERSONAL_PENALTY} s`, "personal");
+  }
+
+  // Identifikations-Event — ersetzt die normale Aufnahme-Runde
+  if (canEvent && Math.random() < EVENT_CHANCE) {
+    state.currentEvent = makeIdentificationEvent();
+    state.currentPatient = null;
+    state.currentOptions = null;
+    state.goldenThisRound = false;
+    state.locked = false;
+    renderEventRound(state.currentEvent);
+    updateTopbar();
+    return;
+  }
+  state.currentEvent = null;
+
+  // Patient-Pool nach aktivem Modus
+  let pool = PATIENTS;
+  if (state.schwarmRounds > 0) {
+    pool = PATIENTS.filter(p => ISO_KINDS.includes(p.kind));
+  }
+  const patient = pool[Math.floor(Math.random() * pool.length)];
+  const options = generateQuestion(patient);
+  state.currentPatient = patient;
+  state.currentOptions = options;
+  state.locked = false;
+
+  // Goldener Patient? Nicht während Rush (Gold ist Solo-Event)
+  state.goldenThisRound = state.rushRounds === 0 && Math.random() < GOLDEN_CHANCE;
+
+  const flagsHtml = patient.flags.map(f => {
+    let cls = "flag";
+    if (/^4MRGN|Strenge Iso/i.test(f) || /MRSA|difficile|Noro|VRE|Tröpfchen|Influenza|RSV/i.test(f)) cls += " warn";
+    else if (/3MRGN|Standardhygiene/i.test(f)) cls += " alert";
+    else if (/Immun|Aplasie|Demenz|Unruhe|Ruft/i.test(f)) cls += " alert";
+    else if (/Sterbe/i.test(f)) cls += " dark";
+    return `<span class="${cls}">${f}</span>`;
+  }).join("");
+  const sexLabel = patient.sex === "m" ? "♂" : "♀";
+  const goldenPill = state.goldenThisRound
+    ? `<div class="golden-pill">🌟 ${GOLDEN_POINTS_X}× Punkte · +${GOLDEN_TIME_BONUS}s</div>`
+    : "";
+
+  const card = document.getElementById("patientCard");
+  card.classList.remove("is-event");
+  card.classList.toggle("golden", state.goldenThisRound);
+  card.innerHTML = `
+    ${goldenPill}
+    <h2>${patient.kuerzel}</h2>
+    <div class="meta">${patient.alter} J · <span class="sex-ico">${sexLabel}</span></div>
+    <div class="diag">${patient.diag}</div>
+    <div class="flags">${flagsHtml}</div>
+  `;
+
+  document.getElementById("optionsContainer").innerHTML = options.map((opt, i) => {
+    const chipsHtml = (opt.chips || []).map(c => `<span class="mini-chip ${c.c || ''}">${c.t}</span>`).join("");
+    const mainText = opt.empty ? opt.roomType : opt.roommate.line;
+    return `
+    <button class="option${opt.empty ? ' is-empty' : ''}" data-idx="${i}">
+      <div class="opt-body">
+        <div class="opt-top">${opt.label}</div>
+        <div class="opt-main">${mainText}</div>
+        <div class="mini-chips">${chipsHtml}</div>
+      </div>
+    </button>`;
+  }).join("");
+
+  document.getElementById("feedbackBox").classList.remove("visible", "ok", "bad");
+
+  document.querySelectorAll(".option").forEach(btn => {
+    btn.addEventListener("click", () => pickOption(parseInt(btn.dataset.idx, 10), btn));
+  });
+
+  updateTopbar();
+}
+
+function pickOption(idx, btn) {
+  if (state.locked) return;
+  state.locked = true;
+
+  const patient = state.currentPatient;
+  const option = state.currentOptions[idx];
+  const problems = checkPair(patient, option);
+  const isCorrect = problems.length === 0 && option._correct;
+
+  // Punkte und Zeit
+  if (isCorrect) {
+    state.correctCount++;
+    state.streak++;
+    if (state.streak > state.bestStreak) state.bestStreak = state.streak;
+
+    // Basis +10 pro richtig, Streak-Bonus ab 3
+    let points = 10;
+    if (state.streak >= 3) points += Math.min(15, (state.streak - 2) * 3);
+
+    // Multiplikatoren (können stacken)
+    let timeBonus = TIME_BONUS;
+    if (state.goldenThisRound) {
+      points *= GOLDEN_POINTS_X;
+      timeBonus = GOLDEN_TIME_BONUS;
+    }
+    if (state.rushRounds > 0) {
+      points *= RUSH_POINTS_MULT;
+    }
+    state.score += points;
+    state.xpGained += 1;
+
+    // Zeitbonus
+    state.timeLeft = Math.min(TIME_START, state.timeLeft + timeBonus);
+
+    const rect = btn.getBoundingClientRect();
+    floatScore(rect.left + rect.width/2, rect.top, `+${points}`, "plus");
+    floatScore(rect.left + rect.width/2, rect.top + 30, `+${timeBonus.toFixed(0)}s`, "plus");
+
+    if (state.goldenThisRound) {
+      snd.streak();
+    } else if (state.streak === 3 || state.streak === 5 || state.streak === 10 || state.streak === 15 || (state.streak % 10 === 0 && state.streak > 0)) {
+      snd.streak();
+    } else {
+      snd.correct();
+    }
+
+    // Bonus-Event Trigger
+    checkBonusTriggers();
+  } else {
+    state.wrongCount++;
+    state.streak = 0;
+    state.kaffeepauseTriggeredAtStreak = -1;
+    state.rushTriggeredAtStreak = -1;
+    state.schwarmTriggeredAtStreak = -1;
+    state.timeLeft = Math.max(0, state.timeLeft - TIME_PENALTY);
+    const rect = btn.getBoundingClientRect();
+    floatScore(rect.left + rect.width/2, rect.top, `−${TIME_PENALTY.toFixed(0)}s`, "minus");
+    snd.wrong();
+  }
+
+  // Bonus-Runden dekrementieren am Ende jeder Runde
+  if (state.rushRounds > 0) state.rushRounds--;
+  if (state.schwarmRounds > 0) state.schwarmRounds--;
+
+  // Optionen visuell markieren
+  document.querySelectorAll(".option").forEach((el, i) => {
+    el.classList.add("disabled");
+    if (state.currentOptions[i]._correct) el.classList.add("correct");
+    if (i === idx && !state.currentOptions[i]._correct) el.classList.add("wrong");
+  });
+
+  // Feedback
+  const fb = document.getElementById("feedbackBox");
+  fb.classList.remove("ok", "bad");
+  if (isCorrect) {
+    const reason = getCorrectReason(patient, option);
+    fb.classList.add("ok", "visible");
+    fb.innerHTML = `<strong>✓ Richtig (+${TIME_BONUS}s)</strong>${reason}`;
+  } else {
+    const correctOpt = state.currentOptions.find(o => o._correct);
+    const reasons = problems.length > 0 ? problems.join(" ") : "Das war nicht die beste Wahl.";
+    fb.classList.add("bad", "visible");
+    fb.innerHTML = `<strong>✗ Nicht ideal (−${TIME_PENALTY}s)</strong>${reasons}<br><br><em>Richtig wäre: ${correctOpt.label} – ${correctOpt.desc}</em>`;
+  }
+
+  updateTopbar();
+  renderTimer();
+
+  // Auto-Weiter nach kurzer Lesezeit
+  const delay = isCorrect ? FEEDBACK_OK : FEEDBACK_BAD;
+  setTimeout(() => {
+    if (!state || state.timeLeft <= 0) return;
+    nextRound();
+  }, delay);
+}
+
+/* ============================================================
+   END OF GAME
+   ============================================================ */
+function endGame() {
+  stopTimer();
+  const duration = Math.round((Date.now() - state.startTs) / 1000);
+  const prevHs = getHighscore();
+  const isNewHs = state.score > prevHs;
+  if (isNewHs) saveHighscore(state.score);
+  const finalHs = getHighscore();
+
+  // XP speichern
+  const xpNew = state.xpStart + state.xpGained;
+  saveXp(xpNew);
+  const lvlBefore = getLevel(state.xpStart);
+  const lvlAfter  = getLevel(xpNew);
+  const leveledUp = lvlAfter.idx > lvlBefore.idx;
+
+  showScreen("endScreen");
+
+  // Level-Text nach Score
+  let level;
+  if (state.score >= 500) level = "Außergewöhnlich";
+  else if (state.score >= 300) level = "Exzellent";
+  else if (state.score >= 200) level = "Starke Schicht";
+  else if (state.score >= 100) level = "Solide";
+  else if (state.score >= 50) level = "Ausbaufähig";
+  else level = "Kurze Schicht";
+
+  document.getElementById("endLevel").textContent = level;
+  document.getElementById("endScore").textContent = state.score;
+  document.getElementById("endDetail").textContent = `Punkte`;
+  document.getElementById("endCorrect").textContent = state.correctCount;
+  document.getElementById("endStreak").textContent = state.bestStreak;
+  document.getElementById("endHs").textContent = finalHs;
+  document.getElementById("endDuration").textContent = duration + "s";
+  document.getElementById("hsBanner").style.display = isNewHs ? "inline-block" : "none";
+
+  // XP-Anzeige
+  const xpDisplay = document.getElementById("xpGainDisplay");
+  if (state.xpGained > 0) {
+    xpDisplay.textContent = `+${state.xpGained} XP · ${lvlAfter.name}`;
+    xpDisplay.style.display = "inline-block";
+  } else {
+    xpDisplay.style.display = "none";
+  }
+  const lvlBanner = document.getElementById("levelUpBanner");
+  if (leveledUp) {
+    lvlBanner.textContent = `⭐ Aufgestiegen: ${lvlAfter.name}`;
+    lvlBanner.style.display = "inline-block";
+  } else {
+    lvlBanner.style.display = "none";
+  }
+
+  snd.gameover();
+  if (leveledUp) setTimeout(() => snd.streak(), 400);
+  updateStartHs();
+}
+
+function updateStartHs() {
+  const hs = getHighscore();
+  const pill = document.getElementById("hsPill");
+  if (hs > 0) {
+    pill.style.display = "inline-flex";
+    document.getElementById("hsVal").textContent = hs;
+  } else {
+    pill.style.display = "none";
+  }
+
+  // XP-Box
+  const xp = getXp();
+  const xpBox = document.getElementById("xpBoxStart");
+  if (xp > 0) {
+    xpBox.style.display = "block";
+    const lvl = getLevel(xp);
+    document.getElementById("xpLevelName").textContent = lvl.name;
+    document.getElementById("xpLevelNums").textContent = xp + " XP";
+    if (lvl.next) {
+      const range = lvl.next.xp - lvl.xp;
+      const within = xp - lvl.xp;
+      const pct = Math.max(0, Math.min(100, (within / range) * 100));
+      document.getElementById("xpBarFill").style.width = pct + "%";
+    } else {
+      document.getElementById("xpBarFill").style.width = "100%";
+    }
+  } else {
+    xpBox.style.display = "none";
+  }
+}
+
+/* ============================================================
+   SHARING
+   ============================================================ */
+async function shareHighscore() {
+  const hs = getHighscore();
+  const score = state ? state.score : hs;
+  const text = `🏥 "Habt ihr noch ein Bett?" — ${score} Punkte in der Pflege-Schicht! Bestmarke: ${hs}. Schaffst du mehr? https://florianloyns.github.io/noch-ein-bett/`;
+  const shareData = {
+    title: "Habt ihr noch ein Bett?",
+    text,
+    url: "https://florianloyns.github.io/noch-ein-bett/"
+  };
+
+  if (navigator.share) {
+    try {
+      await navigator.share(shareData);
+      return;
+    } catch(e) {
+      if (e && e.name === "AbortError") return;
+    }
+  }
+  if (navigator.clipboard) {
+    try {
+      await navigator.clipboard.writeText(text);
+      showToast("In Zwischenablage kopiert");
+      return;
+    } catch(e) {}
+  }
+  showToast("Teilen nicht möglich");
+}
+
+function showToast(msg) {
+  const t = document.createElement("div");
+  t.className = "share-toast";
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2000);
+}
+
+/* ============================================================
+   UI HELPERS
+   ============================================================ */
+function showScreen(id) {
+  ["startScreen","quizScreen","endScreen"].forEach(sid => {
+    document.getElementById(sid).classList.toggle("hidden", sid !== id);
+  });
+}
+
+function floatScore(x, y, text, cls) {
+  const el = document.createElement("div");
+  el.className = "score-float " + cls;
+  el.textContent = text;
+  el.style.left = x + "px";
+  el.style.top = y + "px";
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1000);
+}
+
+/* ============================================================
+   DRAG & DROP (Swipe Patient:in auf Bett)
+   ============================================================ */
+(function setupDrag() {
+  const card = document.getElementById("patientCard");
+  let dragging = false;
+  let startX = 0, startY = 0;
+  let activePointerId = null;
+
+  function getOptionUnder(x, y) {
+    const els = document.elementsFromPoint(x, y);
+    for (const el of els) {
+      const opt = el.closest && el.closest(".option");
+      if (opt) return opt;
+    }
+    return null;
+  }
+
+  function clearDragOver() {
+    document.querySelectorAll(".option").forEach(o => o.classList.remove("drag-over"));
+  }
+
+  card.addEventListener("pointerdown", (e) => {
+    if (!state || state.locked || state.currentEvent) return;
+    dragging = true;
+    startX = e.clientX;
+    startY = e.clientY;
+    activePointerId = e.pointerId;
+    card.classList.add("dragging");
+    try { card.setPointerCapture(e.pointerId); } catch(err) {}
+  });
+
+  card.addEventListener("pointermove", (e) => {
+    if (!dragging || e.pointerId !== activePointerId) return;
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    card.style.transform = `translate(${dx}px, ${dy}px) scale(1.02)`;
+    const over = getOptionUnder(e.clientX, e.clientY);
+    document.querySelectorAll(".option").forEach(o => {
+      o.classList.toggle("drag-over", o === over);
+    });
+  });
+
+  function endDrag(e, cancelled) {
+    if (!dragging) return;
+    const wasPointerId = activePointerId;
+    dragging = false;
+    activePointerId = null;
+    try { card.releasePointerCapture(wasPointerId); } catch(err) {}
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    const moved = Math.hypot(dx, dy) > 14;
+    const over = !cancelled && moved ? getOptionUnder(e.clientX, e.clientY) : null;
+    card.classList.remove("dragging");
+    card.style.transform = "";
+    clearDragOver();
+    if (over) {
+      const idx = parseInt(over.dataset.idx, 10);
+      if (!isNaN(idx)) pickOption(idx, over);
+    }
+  }
+
+  card.addEventListener("pointerup", (e) => endDrag(e, false));
+  card.addEventListener("pointercancel", (e) => endDrag(e, true));
+})();
+
+/* ============================================================
+   INIT
+   ============================================================ */
+updateStartHs();
+
+document.getElementById("btnStart").addEventListener("click", () => {
+  initAudio();
+  newGame();
+});
+document.getElementById("btnRestart").addEventListener("click", () => {
+  initAudio();
+  newGame();
+});
+document.getElementById("btnBack").addEventListener("click", () => {
+  updateStartHs();
+  showScreen("startScreen");
+});
+document.getElementById("btnMute").addEventListener("click", (e) => {
+  muted = !muted;
+  e.target.textContent = muted ? "🔇" : "🔊";
+});
+
+// Pause Timer when tab hidden (prevent "losing" time in background)
+document.addEventListener("visibilitychange", () => {
+  if (!state) return;
+  state.paused = document.hidden;
+});
+
+// PWA
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  });
+}
+</script>
+
+</body>
+</html>
