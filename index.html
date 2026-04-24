@@ -1207,7 +1207,7 @@ function generateQuestion(patient) {
     wrongKeys.push(oppSexKey, sameMrsaKey, sameSterbKey, sameMrgn4Key);
   }
 
-  const wrongOptions = wrongKeys.slice(0, 4).map(key => {
+  const wrongOptions = wrongKeys.slice(0, 3).map(key => {
     const opt = makeOption(nextRoom(), key);
     opt._correct = false;
     return opt;
@@ -1499,7 +1499,7 @@ function makeIdentificationEvent() {
     if (!byKind[d.kind]) byKind[d.kind] = [];
     byKind[d.kind].push(d);
   });
-  const kinds = Object.keys(byKind).sort(() => Math.random() - 0.5).slice(0, 5);
+  const kinds = Object.keys(byKind).sort(() => Math.random() - 0.5).slice(0, 4);
   const pool = kinds.map(k => {
     const d = byKind[k][Math.floor(Math.random() * byKind[k].length)];
     return generatePatientFromDiag(d);
