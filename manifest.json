@@ -1,6 +1,6 @@
 {
   "name": "Habt ihr noch ein Bett?",
-  "short_name": "Noch ein Bett",
+  "short_name": "Bettjagd",
   "description": "Endlos-Quiz zur Bettenzuweisung für die Pflegeausbildung.",
   "start_url": "./",
   "display": "standalone",
