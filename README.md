@@ -13,7 +13,7 @@ Ein browser-basiertes Endlos-Quiz für Pflege-Azubis: Neue Aufnahmen kommen rein
 
 ## Spielprinzip
 
-Oben steht eine neue Aufnahme (Name, Alter, Sex, Diagnose, Iso-Flags). Darunter fünf Bett-Optionen mit Zimmernummer, Mitbewohner:innen-Infos und Iso-Status. Per **Tap oder Drag-&-Drop** wird die Patient:in in eines der Betten platziert.
+Oben steht eine neue Aufnahme (Name, Alter, Sex, Diagnose, Iso-Flags). Darunter drei Bett-Optionen mit Zimmernummer, Mitbewohner:innen-Infos und Iso-Status. Per **Tap oder Drag-&-Drop** wird die Patient:in in eines der Betten platziert.
 
 Getestet wird, ob die gewählte Kombination hygienisch, räumlich und sozial zulässig ist — Isolationsregeln, Kohorten-Konstellationen, Geschlechtertrennung, Schutz vor Infekten bei Immunsupprimierten und psychosoziale Verträglichkeit (Alter, Sterbebegleitung).
 
@@ -63,7 +63,7 @@ Ein Timer läuft kontinuierlich. Richtige Entscheidung: +7 Sekunden. Falsche: �
 - Spezialkost für Immunsupprimierte
 - Klingelalarm
 
-Fünf zufallsgenerierte Patient:innen-Kacheln stehen zur Auswahl, eine ist die richtige. Trainiert Namens-/Diagnose-Zuordnung und Aufmerksamkeit.
+Drei zufallsgenerierte Patient:innen-Kacheln stehen zur Auswahl, eine ist die richtige. Trainiert Namens-/Diagnose-Zuordnung und Aufmerksamkeit.
 
 **🏃 Personalausfall** (5 % Chance) — Kollegin krank, sofort −2 s Zeitstrafe.
 

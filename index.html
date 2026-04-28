@@ -55,7 +55,7 @@
       --ac-stable:  #94a3b8;
     }
     *, *::before, *::after { box-sizing: border-box; }
-    html, body { height: 100%; overflow-x: hidden; }
+    html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
     body {
       margin: 0;
       font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -66,6 +66,7 @@
       -webkit-font-smoothing: antialiased;
       -webkit-tap-highlight-color: transparent;
       user-select: none;
+      touch-action: manipulation;
     }
 
     @keyframes slide-in {
@@ -99,6 +100,17 @@
       60%  { transform: scale(1.15) rotate(5deg); opacity: 1; }
       100% { transform: scale(1) rotate(0deg); opacity: 1; }
     }
+    @keyframes streak-bump {
+      0%   { transform: scale(1); }
+      50%  { transform: scale(1.35) rotate(-4deg); }
+      100% { transform: scale(1) rotate(0); }
+    }
+    @keyframes timer-flash {
+      0%, 100% { box-shadow: inset 0 1px 3px rgba(0,0,0,0.25), 0 0 0 0 rgba(74,222,128,0); }
+      50%      { box-shadow: inset 0 1px 3px rgba(0,0,0,0.25), 0 0 0 6px rgba(74,222,128,0.45); }
+    }
+    .timer-wrap.bonus { animation: timer-flash 0.6s ease-out; }
+    .streak-chip.bump { animation: streak-bump 0.32s ease-out, streak-pulse 1s ease-in-out 0.35s infinite; }
 
     /* ===== Screens ===== */
     .screen {
@@ -107,6 +119,7 @@
       display: flex;
       flex-direction: column;
       padding: 20px;
+      padding-top: max(20px, env(safe-area-inset-top));
     }
     .screen.hidden { display: none; }
 
@@ -188,37 +201,52 @@
     /* ===== Quiz Screen ===== */
     #quizScreen {
       background: var(--bg);
-    }
-    .topbar {
-      display: flex;
-      align-items: center;
+      padding: 12px 14px 0;
+      padding-top: max(12px, env(safe-area-inset-top));
       gap: 10px;
-      margin-bottom: 10px;
+    }
+
+    /* ===== Neue Topbar — Mobile-First, ein Block ===== */
+    .topbar {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      background: linear-gradient(135deg, #0d7377 0%, #0a5c5f 100%);
+      border-radius: 18px;
+      box-shadow: 0 6px 18px rgba(13,115,119,0.25), inset 0 1px 0 rgba(255,255,255,0.18);
+      color: #fff;
+      flex-shrink: 0;
     }
     .timer-wrap {
-      flex: 1;
       position: relative;
-      height: 28px;
+      height: 36px;
+      border-radius: 12px;
+      overflow: hidden;
+      background: rgba(0,0,0,0.22);
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.25);
     }
-    .timer-bar {
+    .timer-bar-fill {
       position: absolute;
       inset: 0;
       height: 100%;
-      background: var(--border);
-      border-radius: 14px;
-      overflow: hidden;
-    }
-    .timer-bar-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--teal) 0%, #16a34a 100%);
+      background: linear-gradient(90deg, #4ade80 0%, #16a34a 60%, #65a30d 100%);
       width: 100%;
-      transition: width 0.1s linear, background 0.25s;
-      border-radius: 14px;
+      transition: width 0.1s linear, background 0.3s;
+      border-radius: 12px;
     }
-    .timer-bar-fill.warn { background: linear-gradient(90deg, #f59e0b 0%, var(--warn) 100%); }
+    .timer-bar-fill::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(255,255,255,0.28) 0%, rgba(255,255,255,0) 50%);
+      border-radius: 12px;
+    }
+    .timer-bar-fill.warn { background: linear-gradient(90deg, #fbbf24 0%, #f59e0b 60%, #ea580c 100%); }
     .timer-bar-fill.critical {
-      background: var(--warn);
-      animation: flash-warn 0.5s infinite;
+      background: linear-gradient(90deg, #ef4444 0%, var(--warn) 100%);
+      animation: flash-warn 0.45s infinite;
     }
     .timer-label {
       position: absolute;
@@ -226,35 +254,68 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      gap: 4px;
       font-weight: 900;
-      font-size: 14px;
+      font-size: 17px;
       color: #fff;
-      text-shadow: 0 1px 3px rgba(0,0,0,0.35);
-      letter-spacing: 0.5px;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.45);
+      letter-spacing: 0.3px;
       font-variant-numeric: tabular-nums;
+      pointer-events: none;
     }
-    .score-chip {
-      background: var(--teal);
-      color: #fff;
-      padding: 6px 12px;
-      border-radius: 14px;
+    .timer-label .tl-unit { font-size: 11px; opacity: 0.85; font-weight: 700; margin-left: 1px; }
+
+    .score-pod {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 1px;
+      padding: 2px 12px;
+      min-width: 64px;
+    }
+    .score-pod .sp-label {
+      font-size: 9px;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      opacity: 0.72;
+      font-weight: 800;
+      line-height: 1;
+    }
+    .score-pod .sp-val {
+      font-size: 22px;
       font-weight: 900;
-      font-size: 15px;
-      min-width: 56px;
-      text-align: center;
+      line-height: 1;
+      letter-spacing: -0.02em;
       font-variant-numeric: tabular-nums;
+      transition: transform 0.18s ease-out, color 0.2s;
     }
+    .score-pod .sp-val.bump { transform: scale(1.18); color: #fde68a; }
+
     .streak-chip {
-      background: var(--gold);
-      color: #1a1a1a;
-      padding: 6px 10px;
-      border-radius: 14px;
+      background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
+      color: #fff;
+      padding: 6px 10px 6px 8px;
+      border-radius: 999px;
       font-weight: 900;
-      font-size: 12px;
+      font-size: 13px;
       display: none;
-      animation: pulse 0.8s ease-in-out infinite;
+      align-items: center;
+      gap: 3px;
+      box-shadow: 0 3px 10px rgba(234,88,12,0.45), inset 0 1px 0 rgba(255,255,255,0.3);
+      animation: streak-pulse 1s ease-in-out infinite;
+      letter-spacing: 0.3px;
+      line-height: 1;
     }
-    .streak-chip.visible { display: inline-block; }
+    .streak-chip.visible { display: inline-flex; }
+    .streak-chip.hot { background: linear-gradient(135deg, #dc2626 0%, #7c1d6f 100%); }
+    .streak-chip.fire { background: linear-gradient(135deg, #fbbf24 0%, #dc2626 50%, #7c1d6f 100%); }
+    @keyframes streak-pulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 3px 10px rgba(234,88,12,0.45), inset 0 1px 0 rgba(255,255,255,0.3); }
+      50%      { transform: scale(1.06); box-shadow: 0 5px 16px rgba(234,88,12,0.65), inset 0 1px 0 rgba(255,255,255,0.4); }
+    }
+    .streak-chip .sf-emoji { font-size: 14px; line-height: 1; }
+    .streak-chip .sf-num   { font-variant-numeric: tabular-nums; }
+
     .mute-btn {
       background: transparent;
       border: 0;
@@ -265,19 +326,32 @@
       line-height: 1;
     }
 
-    /* ===== Patient Card (reduziert) ===== */
+    /* ===== Patient Card (visuell hervorgehoben) ===== */
     .patient-card {
-      background: var(--card);
-      border-radius: 16px;
-      padding: 14px 18px;
-      box-shadow: 0 2px 12px rgba(15,31,31,0.06);
-      margin-bottom: 10px;
+      position: relative;
+      background: linear-gradient(135deg, #ffffff 0%, #e8f3f2 100%);
+      border-radius: 18px;
+      padding: 14px 16px 12px;
+      border: 1px solid #c7dedc;
+      box-shadow: 0 8px 22px rgba(13, 115, 119, 0.16), 0 2px 6px rgba(15, 31, 31, 0.06);
       animation: slide-up 0.25s ease-out;
       flex-shrink: 0;
       cursor: grab;
       touch-action: none;
       transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s;
       will-change: transform;
+    }
+    /* Kleine "Aufnahme"-Markierung oben rechts, damit klar ist: das ist die Aufnahme */
+    .patient-card::after {
+      content: "AUFNAHME";
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      font-size: 9px;
+      font-weight: 900;
+      letter-spacing: 1.4px;
+      color: var(--teal);
+      opacity: 0.55;
     }
     .patient-card:active { cursor: grabbing; }
     .patient-card.dragging {
@@ -297,7 +371,7 @@
     .drag-hint {
       font-size: 10.5px;
       color: var(--muted);
-      margin-top: 6px;
+      margin-top: 4px;
       display: flex;
       align-items: center;
       gap: 4px;
@@ -327,30 +401,31 @@
     .pg-badge .pg-num { font-size: 24px; font-weight: 900; letter-spacing: -0.03em; }
     .patient-card h2 {
       margin: 0 0 2px;
-      font-size: 20px;
+      font-size: 21px;
       font-weight: 800;
       color: var(--ink);
       letter-spacing: -0.01em;
       line-height: 1.1;
+      padding-right: 76px; /* Platz für AUFNAHME-Label */
     }
     .patient-card .meta {
       color: var(--muted);
-      font-size: 15.5px;
-      margin-bottom: 6px;
+      font-size: 14.5px;
+      margin-bottom: 4px;
       font-weight: 600;
     }
     .patient-card .diag {
       color: var(--ink);
-      font-size: 14px;
+      font-size: 14.5px;
       font-weight: 700;
       margin-bottom: 4px;
       line-height: 1.3;
     }
 
-    /* ===== Options (screen-filling) ===== */
+    /* ===== Options: Grid mit 3 gleich hohen Zeilen ===== */
     .options {
-      display: flex;
-      flex-direction: column;
+      display: grid;
+      grid-template-rows: repeat(3, 1fr);
       gap: 10px;
       flex: 1;
       min-height: 0;
@@ -359,63 +434,77 @@
       background: var(--card);
       border: 2px solid var(--border);
       border-radius: 14px;
-      padding: 10px 14px;
+      padding: 12px 14px;
       cursor: pointer;
-      transition: all 0.15s;
+      transition: transform 0.12s ease-out, border-color 0.18s, background 0.2s, box-shadow 0.18s;
       font-family: inherit;
       text-align: left;
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       gap: 10px;
-      flex: 1 1 0;
       min-height: 0;
       overflow: hidden;
       animation: slide-in 0.22s ease-out;
       animation-fill-mode: backwards;
+      box-shadow: 0 2px 6px rgba(15,31,31,0.04);
+      width: 100%;
     }
     .option:nth-child(1) { animation-delay: 0.02s; }
     .option:nth-child(2) { animation-delay: 0.06s; }
     .option:nth-child(3) { animation-delay: 0.10s; }
-    .option:nth-child(4) { animation-delay: 0.14s; }
-    .option:nth-child(5) { animation-delay: 0.18s; }
-    .option:active { transform: scale(0.985); }
+    .option:active { transform: scale(0.98); }
     .option:hover { border-color: var(--teal); }
-    .option.correct { border-color: var(--ok); background: var(--ok-soft); }
-    .option.wrong   { border-color: var(--warn); background: var(--warn-soft); animation: shake 0.35s; }
+    .option.correct { border-color: var(--ok); background: var(--ok-soft); box-shadow: 0 4px 14px rgba(22,163,74,0.18); }
+    .option.wrong   { border-color: var(--warn); background: var(--warn-soft); animation: shake 0.35s; box-shadow: 0 4px 14px rgba(220,38,38,0.18); }
     .option.disabled { pointer-events: none; }
     .option.disabled:not(.correct):not(.wrong) { opacity: 0.4; }
-    .option .opt-body { flex: 1; min-width: 0; }
+    .option .opt-body { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 3px; }
     .opt-top {
       font-size: 10.5px;
       font-weight: 800;
       letter-spacing: 1.2px;
       text-transform: uppercase;
       color: var(--muted);
-      margin-bottom: 2px;
     }
     .opt-main {
-      font-size: 15.5px;
+      font-size: 16px;
       font-weight: 800;
       color: var(--ink);
       line-height: 1.2;
       letter-spacing: -0.005em;
     }
     .option.is-empty .opt-main { font-size: 17px; color: var(--ok); }
+    .opt-empty-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: var(--ok-soft);
+      color: var(--ok);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      font-weight: 900;
+      flex-shrink: 0;
+    }
     .mini-chips {
       display: flex;
       flex-wrap: wrap;
       gap: 4px;
-      margin-top: 5px;
+      margin-top: 2px;
+      max-height: 22px;
+      overflow: hidden;
     }
     .mini-chip {
-      padding: 3px 8px;
+      padding: 2px 8px;
       border-radius: 999px;
-      font-size: 11.5px;
+      font-size: 11px;
       font-weight: 700;
       letter-spacing: 0.2px;
       background: var(--teal-soft);
       color: var(--teal-dark);
       white-space: nowrap;
+      line-height: 1.5;
     }
     .sex-ico {
       font-size: 1.55em;
@@ -460,30 +549,74 @@
     .flag.alert { background: #fef3c7; color: #854d0e; }
     .flag.dark  { background: #1e3a3a; color: #fff; }
 
-    /* ===== Feedback: fixiert am unteren Bildschirmrand, damit es nicht das Layout verschiebt ===== */
+    /* ===== Feedback: fester reservierter Bereich unten — keine Layout-Verschiebung ===== */
     .feedback {
-      position: fixed;
-      left: 50%;
-      bottom: 14px;
-      transform: translateX(-50%);
-      width: calc(100% - 28px);
-      max-width: 460px;
-      padding: 14px 16px;
-      border-radius: 14px;
+      flex-shrink: 0;
+      min-height: 92px;
+      max-height: 32vh;
+      margin: 0 -14px;
+      padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+      border-radius: 18px 18px 0 0;
       font-size: 13.5px;
-      line-height: 1.4;
-      background: #fff;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.22), 0 2px 6px rgba(0,0,0,0.08);
-      animation: slide-up 0.22s ease-out;
-      display: none;
-      z-index: 200;
-      max-height: 45vh;
+      line-height: 1.42;
+      background: #ffffff;
+      box-shadow: 0 -8px 24px rgba(0,0,0,0.10);
+      transition: background 0.25s, color 0.25s, box-shadow 0.25s;
       overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      color: var(--body);
     }
-    .feedback.visible { display: block; }
-    .feedback.ok  { background: var(--ok-soft);  border-left: 4px solid var(--ok);  color: #14532d; }
-    .feedback.bad { background: var(--warn-soft); border-left: 4px solid var(--warn); color: #7f1d1d; }
-    .feedback strong { display: block; font-weight: 800; margin-bottom: 4px; font-size: 14px; }
+    .feedback.idle {
+      background: linear-gradient(180deg, #ffffff 0%, #f0f6f5 100%);
+      color: var(--muted);
+      text-align: center;
+    }
+    .feedback.idle .fb-head { color: var(--teal); font-size: 12px; letter-spacing: 1.4px; text-transform: uppercase; font-weight: 900; margin-bottom: 4px; }
+    .feedback.idle .fb-hint { font-size: 13px; opacity: 0.85; }
+    .feedback.ok  { background: linear-gradient(180deg, var(--ok-soft) 0%, #c4f4d3 100%); border-top: 4px solid var(--ok);  color: #14532d; animation: fb-pop 0.32s ease-out; }
+    .feedback.bad { background: linear-gradient(180deg, var(--warn-soft) 0%, #fcd0d0 100%); border-top: 4px solid var(--warn); color: #7f1d1d; animation: fb-pop 0.32s ease-out; }
+    .feedback .fb-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 900;
+      font-size: 18px;
+      margin-bottom: 4px;
+      letter-spacing: -0.01em;
+    }
+    .feedback .fb-head .fb-icon {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+      color: #fff;
+    }
+    .feedback.ok .fb-head .fb-icon { background: var(--ok); }
+    .feedback.bad .fb-head .fb-icon { background: var(--warn); }
+    .feedback .fb-head .fb-delta {
+      margin-left: auto;
+      font-size: 13px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: rgba(0,0,0,0.08);
+      letter-spacing: 0.2px;
+      font-variant-numeric: tabular-nums;
+    }
+    .feedback.ok  .fb-head .fb-delta { background: rgba(22,163,74,0.18); }
+    .feedback.bad .fb-head .fb-delta { background: rgba(220,38,38,0.16); }
+    .feedback .fb-body { font-size: 13.5px; line-height: 1.42; }
+    .feedback .fb-correct { display: block; margin-top: 4px; font-size: 12.5px; font-style: italic; opacity: 0.92; }
+    @keyframes fb-pop {
+      0%   { transform: scale(0.985); opacity: 0.85; }
+      100% { transform: scale(1); opacity: 1; }
+    }
 
     /* ===== End Screen ===== */
     #endScreen {
@@ -685,15 +818,23 @@
       to { opacity: 0; transform: translate(-50%, -50%) scale(0.85); }
     }
 
-    /* ===== Rush / Schwarm Indikator oben ===== */
+    /* ===== Rush / Schwarm Indikator (zwischen Topbar und Patient) ===== */
+    .modes-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      min-height: 0;
+    }
+    .modes-row:empty { display: none; }
     .mode-chip {
       font-size: 11px;
       font-weight: 900;
-      padding: 4px 9px;
-      border-radius: 10px;
+      padding: 4px 10px;
+      border-radius: 999px;
       letter-spacing: 0.5px;
       color: #fff;
       animation: pulse 1s ease-in-out infinite;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.18);
     }
     .mode-chip.rush    { background: linear-gradient(135deg, #f59e0b, #dc2626); }
     .mode-chip.schwarm { background: linear-gradient(135deg, #0d7377, #7c3aed); }
@@ -800,15 +941,19 @@
 <div class="screen hidden" id="quizScreen">
   <div class="topbar">
     <div class="timer-wrap">
-      <div class="timer-bar">
-        <div class="timer-bar-fill" id="timerBarFill"></div>
-      </div>
-      <div class="timer-label" id="timerLabel">20.0</div>
+      <div class="timer-bar-fill" id="timerBarFill"></div>
+      <div class="timer-label" id="timerLabel"><span id="timerNum">20.0</span><span class="tl-unit">s</span></div>
     </div>
+    <span class="streak-chip" id="streakChip"><span class="sf-emoji">🔥</span><span class="sf-num">3</span></span>
+    <div class="score-pod">
+      <div class="sp-label">Punkte</div>
+      <div class="sp-val" id="scoreDisplay">0</div>
+    </div>
+  </div>
+
+  <div class="modes-row" id="modesRow">
     <span class="mode-chip rush" id="rushChip" style="display:none;">⚡ RUSH 3</span>
     <span class="mode-chip schwarm" id="schwarmChip" style="display:none;">🎯 ISO 5</span>
-    <span class="streak-chip" id="streakChip">🔥 3</span>
-    <span class="score-chip" id="scoreDisplay">0</span>
   </div>
 
   <div class="patient-card" id="patientCard">
@@ -817,7 +962,10 @@
 
   <div class="options" id="optionsContainer"></div>
 
-  <div class="feedback" id="feedbackBox"></div>
+  <div class="feedback idle" id="feedbackBox">
+    <div class="fb-head">Bett wählen</div>
+    <div class="fb-hint">Tippe oder ziehe die Aufnahme auf ein Bett.</div>
+  </div>
 </div>
 
 <!-- ===== End Screen ===== -->
@@ -1217,7 +1365,7 @@ function generateQuestion(patient) {
     wrongKeys.push(oppSexKey, sameMrsaKey, sameSterbKey, sameMrgn4Key);
   }
 
-  const wrongOptions = wrongKeys.slice(0, 3).map(key => {
+  const wrongOptions = wrongKeys.slice(0, 2).map(key => {
     const opt = makeOption(nextRoom(), key);
     opt._correct = false;
     return opt;
@@ -1241,10 +1389,12 @@ function renderEventRound(evState) {
 
   document.getElementById("optionsContainer").innerHTML = pool.map((p, i) => {
     const chips = [{t:`${p.alter} J`, c:""}];
+    // Iso-Doppelung weglassen, Standardhygiene weglassen — wir zeigen nur den Erreger
     p.flags.forEach(f => {
+      if (/^(Kontakt-Iso|Strenge Iso|Tröpfchen-Iso|Standardhygiene)$/i.test(f)) return;
       let c = "";
-      if (/^4MRGN|Strenge Iso/i.test(f) || /MRSA|difficile|Noro|VRE|Tröpfchen|Influenza|RSV/i.test(f)) c = "warn";
-      else if (/3MRGN|Standardhygiene|Immun|Aplasie|Demenz|Unruhe|Ruft/i.test(f)) c = "alert";
+      if (/4MRGN/i.test(f) || /MRSA|difficile|Noro|VRE|Tröpfchen|Influenza|RSV/i.test(f)) c = "warn";
+      else if (/3MRGN|Immun|Aplasie|Demenz|Unruhe|Ruft/i.test(f)) c = "alert";
       else if (/Sterbe/i.test(f)) c = "dark";
       chips.push({t:f, c});
     });
@@ -1260,7 +1410,7 @@ function renderEventRound(evState) {
     `;
   }).join("");
 
-  document.getElementById("feedbackBox").classList.remove("visible", "ok", "bad");
+  resetFeedbackToIdle();
 
   document.querySelectorAll(".option").forEach(btn => {
     btn.addEventListener("click", () => pickEventOption(parseInt(btn.dataset.idx, 10), btn));
@@ -1309,13 +1459,27 @@ function pickEventOption(idx, btn) {
   });
 
   const fb = document.getElementById("feedbackBox");
-  fb.classList.remove("ok", "bad");
+  fb.className = "feedback " + (isCorrect ? "ok" : "bad");
   if (isCorrect) {
-    fb.classList.add("ok", "visible");
-    fb.innerHTML = `<strong>✓ Richtig</strong>${target.kuerzel} · ${target.alter} J · ${target.diag}`;
+    fb.innerHTML = `
+      <div class="fb-head">
+        <span class="fb-icon">✓</span>
+        <span>Erkannt</span>
+        <span class="fb-delta">+${TIME_BONUS}s</span>
+      </div>
+      <div class="fb-body">${target.kuerzel} · ${target.alter} J · ${target.diag}</div>
+    `;
+    vib(20);
   } else {
-    fb.classList.add("bad", "visible");
-    fb.innerHTML = `<strong>✗ Falsch</strong>Gesucht war: ${target.kuerzel} (${target.diag})`;
+    fb.innerHTML = `
+      <div class="fb-head">
+        <span class="fb-icon">✕</span>
+        <span>Falsch</span>
+        <span class="fb-delta">−${TIME_PENALTY}s</span>
+      </div>
+      <div class="fb-body">Gesucht war: ${target.kuerzel} <span class="fb-correct">(${target.diag})</span></div>
+    `;
+    vib([30, 50, 30]);
   }
 
   if (state.rushRounds > 0) state.rushRounds--;
@@ -1505,7 +1669,7 @@ function makeIdentificationEvent() {
     if (!byKind[d.kind]) byKind[d.kind] = [];
     byKind[d.kind].push(d);
   });
-  const kinds = Object.keys(byKind).sort(() => Math.random() - 0.5).slice(0, 4);
+  const kinds = Object.keys(byKind).sort(() => Math.random() - 0.5).slice(0, 3);
   const pool = kinds.map(k => {
     const d = byKind[k][Math.floor(Math.random() * byKind[k].length)];
     return generatePatientFromDiag(d);
@@ -1663,19 +1827,36 @@ function renderTimer() {
   const pct = Math.max(0, Math.min(100, (state.timeLeft / TIME_START) * 100));
   const fill = document.getElementById("timerBarFill");
   fill.style.width = pct + "%";
-  fill.classList.toggle("warn", state.timeLeft < 8 && state.timeLeft >= 4);
-  fill.classList.toggle("critical", state.timeLeft < 4);
-  document.getElementById("timerLabel").textContent = state.timeLeft.toFixed(1);
+  fill.classList.toggle("warn", state.timeLeft < 12 && state.timeLeft >= 5);
+  fill.classList.toggle("critical", state.timeLeft < 5);
+  document.getElementById("timerNum").textContent = state.timeLeft.toFixed(1);
 }
 
+let _lastScore = 0;
 function updateTopbar() {
-  document.getElementById("scoreDisplay").textContent = state.score;
+  const scoreEl = document.getElementById("scoreDisplay");
+  if (state.score !== _lastScore) {
+    scoreEl.textContent = state.score;
+    scoreEl.classList.remove("bump");
+    // Reflow to restart animation
+    void scoreEl.offsetWidth;
+    scoreEl.classList.add("bump");
+    setTimeout(() => scoreEl.classList.remove("bump"), 220);
+    _lastScore = state.score;
+  }
   const chip = document.getElementById("streakChip");
   if (state.streak >= 3) {
-    chip.textContent = "🔥 " + state.streak;
+    const wasVisible = chip.classList.contains("visible");
+    chip.querySelector(".sf-num").textContent = state.streak;
     chip.classList.add("visible");
+    chip.classList.toggle("hot",  state.streak >= 7  && state.streak < 12);
+    chip.classList.toggle("fire", state.streak >= 12);
+    // Bump-Animation bei Anstieg
+    chip.classList.remove("bump");
+    void chip.offsetWidth;
+    chip.classList.add("bump");
   } else {
-    chip.classList.remove("visible");
+    chip.classList.remove("visible", "hot", "fire", "bump");
   }
   const rushChip = document.getElementById("rushChip");
   if (state.rushRounds > 0) {
@@ -1691,6 +1872,20 @@ function updateTopbar() {
   } else {
     schwarmChip.style.display = "none";
   }
+}
+
+function resetFeedbackToIdle() {
+  const fb = document.getElementById("feedbackBox");
+  fb.className = "feedback idle";
+  fb.innerHTML = `
+    <div class="fb-head">Bett wählen</div>
+    <div class="fb-hint">Tippe oder ziehe die Aufnahme auf ein Bett.</div>
+  `;
+}
+
+/* Vibration-Helper (Mobile) — fail silent wenn nicht unterstützt */
+function vib(pattern) {
+  try { if (navigator.vibrate) navigator.vibrate(pattern); } catch(e) {}
 }
 
 function nextRound() {
@@ -1730,7 +1925,17 @@ function nextRound() {
   // Goldener Patient? Nicht während Rush (Gold ist Solo-Event)
   state.goldenThisRound = state.rushRounds === 0 && Math.random() < GOLDEN_CHANCE;
 
-  const flagsHtml = patient.flags.map(f => {
+  // Patient-Karte: nur entscheidungsrelevante Flags. Iso-Begriffe entfernen,
+  // wenn der Erreger schon genannt ist (sonst doppelt). Auch "Standardhygiene" raus
+  // (= Stationsdefault, sagt nichts).
+  const filteredFlags = patient.flags.filter(f => {
+    if (/^(Kontakt-Iso|Strenge Iso|Tröpfchen-Iso|Standardhygiene)$/i.test(f)) {
+      // nur weglassen wenn ein Erreger-Flag existiert
+      return !patient.flags.some(g => /MRSA|Noro|VRE|C\.?\s*difficile|3MRGN|4MRGN|Influenza|RSV/i.test(g));
+    }
+    return true;
+  });
+  const flagsHtml = filteredFlags.map(f => {
     let cls = "flag";
     if (/^4MRGN|Strenge Iso/i.test(f) || /MRSA|difficile|Noro|VRE|Tröpfchen|Influenza|RSV/i.test(f)) cls += " warn";
     else if (/3MRGN|Standardhygiene/i.test(f)) cls += " alert";
@@ -1754,10 +1959,14 @@ function nextRound() {
   `;
 
   document.getElementById("optionsContainer").innerHTML = options.map((opt, i) => {
-    const chipsHtml = (opt.chips || []).filter(c => c.c !== 'pg').map(c => `<span class="mini-chip ${c.c || ''}">${c.t}</span>`).join("");
+    // Realistische Bett-Chips: keine PG-Stufe, keine Doppelung "Iso" + "Erreger"
+    const cleanChips = simplifyOptionChips(opt);
+    const chipsHtml = cleanChips.map(c => `<span class="mini-chip ${c.c || ''}">${c.t}</span>`).join("");
     const mainText = opt.empty ? opt.roomType : opt.roommate.line;
+    const leftIcon = opt.empty ? `<div class="opt-empty-icon">＋</div>` : "";
     return `
     <button class="option${opt.empty ? ' is-empty' : ''}" data-idx="${i}">
+      ${leftIcon}
       <div class="opt-body">
         <div class="opt-top">${opt.label}</div>
         <div class="opt-main">${mainText}</div>
@@ -1766,13 +1975,39 @@ function nextRound() {
     </button>`;
   }).join("");
 
-  document.getElementById("feedbackBox").classList.remove("visible", "ok", "bad");
+  resetFeedbackToIdle();
 
   document.querySelectorAll(".option").forEach(btn => {
     btn.addEventListener("click", () => pickOption(parseInt(btn.dataset.idx, 10), btn));
   });
 
   updateTopbar();
+}
+
+/* Reduziert Chips auf das, was am Whiteboard tatsächlich relevant ist:
+   - keine PG-Stufe (auf vielen Stationen nicht öffentlich)
+   - keine Doppelung "MRSA" + "Kontakt-Iso" → nur Erreger zeigen, Iso ergibt sich
+   - keine "Standardhygiene"-Chips (Default)
+   - Diagnosen kürzen (z.B. "Z. n. ..." → kompakter)
+*/
+function simplifyOptionChips(opt) {
+  if (!opt.chips) return [];
+  const ISO_REDUNDANT = /^(Kontakt-Iso|Strenge Iso|Tröpfchen-Iso|Standardhygiene)$/i;
+  const out = [];
+  let hasErreger = false;
+  for (const c of opt.chips) {
+    if (c.c === "pg") continue;
+    if (ISO_REDUNDANT.test(c.t)) {
+      // Wenn schon ein Erreger-Chip existiert, weglassen
+      if (hasErreger) continue;
+    }
+    if (/MRSA|Noro|VRE|C\.?\s*difficile|Influenza|RSV|Aplasie|3MRGN|4MRGN/i.test(c.t)) hasErreger = true;
+    // Diagnose-Bereinigung
+    let t = c.t.replace(/^Z\. n\. /, "").replace(/^Z\.n\. /, "");
+    out.push({ ...c, t });
+  }
+  // Ein "Iso"-Marker reicht — falls "MRSA" erkannt aber kein Iso-Chip da ist, den Stationsblick simulieren wir nicht
+  return out;
 }
 
 function pickOption(idx, btn) {
@@ -1808,6 +2043,14 @@ function pickOption(idx, btn) {
 
     // Zeitbonus
     state.timeLeft = Math.min(TIME_START, state.timeLeft + timeBonus);
+    // Visueller Time-Flash auf der Timer-Bar
+    const tw = document.querySelector(".timer-wrap");
+    if (tw) {
+      tw.classList.remove("bonus");
+      void tw.offsetWidth;
+      tw.classList.add("bonus");
+      setTimeout(() => tw.classList.remove("bonus"), 600);
+    }
 
     const rect = btn.getBoundingClientRect();
     floatScore(rect.left + rect.width/2, rect.top, `+${points}`, "plus");
@@ -1846,18 +2089,36 @@ function pickOption(idx, btn) {
     if (i === idx && !state.currentOptions[i]._correct) el.classList.add("wrong");
   });
 
-  // Feedback
+  // Feedback: fester Bereich unten
   const fb = document.getElementById("feedbackBox");
-  fb.classList.remove("ok", "bad");
+  fb.className = "feedback " + (isCorrect ? "ok" : "bad");
   if (isCorrect) {
     const reason = getCorrectReason(patient, option);
-    fb.classList.add("ok", "visible");
-    fb.innerHTML = `<strong>✓ Richtig (+${TIME_BONUS}s)</strong>${reason}`;
+    fb.innerHTML = `
+      <div class="fb-head">
+        <span class="fb-icon">✓</span>
+        <span>Richtig</span>
+        <span class="fb-delta">+${TIME_BONUS}s</span>
+      </div>
+      <div class="fb-body">${reason}</div>
+    `;
+    vib(20);
   } else {
     const correctOpt = state.currentOptions.find(o => o._correct);
     const reasons = problems.length > 0 ? problems.join(" ") : "Das war nicht die beste Wahl.";
-    fb.classList.add("bad", "visible");
-    fb.innerHTML = `<strong>✗ Nicht ideal (−${TIME_PENALTY}s)</strong>${reasons}<br><br><em>Richtig wäre: ${correctOpt.label} – ${correctOpt.desc}</em>`;
+    const correctMain = correctOpt.empty ? correctOpt.roomType : correctOpt.roommate.line;
+    fb.innerHTML = `
+      <div class="fb-head">
+        <span class="fb-icon">✕</span>
+        <span>Falsch</span>
+        <span class="fb-delta">−${TIME_PENALTY}s</span>
+      </div>
+      <div class="fb-body">
+        ${reasons}
+        <span class="fb-correct">Richtig wäre: ${correctOpt.label} – ${correctMain}</span>
+      </div>
+    `;
+    vib([30, 50, 30]);
   }
 
   updateTopbar();
