@@ -902,15 +902,30 @@
       box-shadow: 0 6px 20px rgba(234,179,8,0.4);
     }
 
-    footer {
+    /* Screen-Footer: Impressum-Link unten am Rand der jeweiligen Vollbild-Screens */
+    .screen-footer {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: max(12px, env(safe-area-inset-bottom));
       text-align: center;
-      font-size: 10px;
-      color: var(--muted);
-      padding: 10px;
+      font-size: 11px;
+      letter-spacing: 0.4px;
+      pointer-events: none;
     }
-    footer a { color: inherit; }
-    #startScreen footer, #endScreen footer { color: rgba(255,255,255,0.5); }
-    #startScreen footer a, #endScreen footer a { color: inherit; }
+    .screen-footer a {
+      color: inherit;
+      opacity: 0.6;
+      text-decoration: none;
+      border-bottom: 1px solid currentColor;
+      padding-bottom: 1px;
+      pointer-events: auto;
+      transition: opacity 0.15s;
+    }
+    .screen-footer a:hover,
+    .screen-footer a:active { opacity: 0.9; }
+    #startScreen .screen-footer,
+    #endScreen   .screen-footer { color: rgba(255,255,255,0.85); }
   </style>
 </head>
 <body>
@@ -935,6 +950,10 @@
   </div>
 
   <button class="start-btn" id="btnStart">Schicht starten →</button>
+
+  <div class="screen-footer">
+    <a href="https://florianloyns.github.io/Impressum/" target="_blank" rel="noopener noreferrer">Impressum</a>
+  </div>
 </div>
 
 <!-- ===== Quiz Screen ===== -->
@@ -1006,11 +1025,11 @@
     <button class="primary" id="btnRestart">Neue Schicht</button>
     <button class="secondary" id="btnBack">Zurück zum Start</button>
   </div>
-</div>
 
-<footer>
-  <a href="https://florianloyns.github.io/Impressum/" target="_blank" rel="noopener noreferrer">Impressum</a>
-</footer>
+  <div class="screen-footer">
+    <a href="https://florianloyns.github.io/Impressum/" target="_blank" rel="noopener noreferrer">Impressum</a>
+  </div>
+</div>
 
 <script>
 /* ============================================================
