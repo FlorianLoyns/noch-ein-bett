@@ -54,6 +54,14 @@
       --ac-free:    #16a34a;
       --ac-stable:  #94a3b8;
     }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg:#0f1714; --bg2:#141f1d; --card:#1a2826;
+        --ink:#e8f0ef; --body:#a8bcba; --muted:#6b7b7b;
+        --border:#243230; --teal-light:#1a3033; --teal-soft:#1e3d3f;
+        --ok-soft:#0d3a1f; --warn-soft:#3a2812;
+      }
+    }
     *, *::before, *::after { box-sizing: border-box; }
     html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
     body {
@@ -917,8 +925,6 @@
       color: inherit;
       opacity: 0.6;
       text-decoration: none;
-      border-bottom: 1px solid currentColor;
-      padding-bottom: 1px;
       pointer-events: auto;
       transition: opacity 0.15s;
     }
