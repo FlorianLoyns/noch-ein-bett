@@ -22,8 +22,11 @@ Ein Timer läuft kontinuierlich. Richtige Entscheidung: +7 Sekunden. Falsche: �
 ## Was das Spiel trainiert
 
 - **Isolationsregeln**: MRSA, C. difficile, Noro, VRE, Tröpfchen, 3MRGN vs. 4MRGN
+- **Aerogene Isolation**: Tuberkulose, Masern, Windpocken — Einzelzimmer MIT Schleuse statt nur Einzelzimmer
 - **Kohortenisolation** vs. Einzelzimmer-Pflicht
 - **Immunsuppression**: Risikokonstellationen erkennen
+- **Telemetrie-Pflicht**: Monitor-Bett-Bedarf erkennen
+- **Pflegegrad-Balance**: hohe Pflegegrade nicht ungebremst zusammenlegen
 - **Geschlechtertrennung** im Mehrbettzimmer
 - **Psychosoziale Verträglichkeit**: Demenz, Unruhe, Sterbebegleitung, Altersabstand
 - **Patientenidentifikation**: Namen lesen, Diagnose zuordnen, Fall erkennen
@@ -33,9 +36,9 @@ Ein Timer läuft kontinuierlich. Richtige Entscheidung: +7 Sekunden. Falsche: �
 
 | Element         | Effekt                                          |
 | --------------- | ----------------------------------------------- |
-| Start-Timer     | 65 Sekunden, Drain 30 % langsamer als Echtzeit  |
+| Start-Timer     | 65 Sekunden, Drain 30 % langsamer als Echtzeit; Tempo steigt mit der Zahl richtiger Antworten dieser Schicht auf bis zu +45 % |
 | Richtig         | +7 s Zeit, Basis +10 Punkte + Streak-Bonus      |
-| Falsch          | −3 s Zeit, Streak auf 0                          |
+| Falsch          | −3 s Zeit, steigt bei mehreren Fehlern in Folge bis −6 s; Streak auf 0 |
 | Streak ab 3     | Zusätzliche +3 bis +15 Bonus-Punkte pro Antwort |
 | Endlos-Modus    | Patient:innen kommen bis Timer = 0              |
 | Highscore       | Lokal in `localStorage` (kein Server)           |
@@ -51,9 +54,14 @@ Ein Timer läuft kontinuierlich. Richtige Entscheidung: +7 Sekunden. Falsche: �
 
 **🎯 Infekt-Schwarm** (bei 15er-Streak) — Die nächsten 5 Patient:innen sind alle Isolations-Fälle.
 
+**🚨 Notfall-Ruf** (6 % Chance pro Runde, nach Aufwärmphase) — Kontrollverlust statt Zeitverlust: die Runde ist normal sichtbar, aber 5 Sekunden lang gesperrt, während der Timer ungebremst weiterläuft.
+
+**🚫 Bett storniert** (10 % Chance pro Runde) — Mitten in einer normalen Runde fällt eine der falschen Optionen weg ("gerade durch die Notaufnahme belegt"). Die richtige Antwort bleibt immer wählbar, die Runde ist nie unlösbar.
+
 **Identifikations-Events** (ca. 14 % Chance pro Runde) — Statt einer neuen Aufnahme kommt eine alltagsrealistische Aufgabe:
 
 - Angehörige an der Tür — wer ist die gesuchte Person?
+- Angehörige ohne Schutzkleidung aus dem Zimmer — bei wem war das?
 - Blutabnahme fällig — welche:r Patient:in?
 - Oberärztin will Sono beim Fall mit Diagnose X
 - Chefarzt will zur Visite
@@ -65,7 +73,7 @@ Ein Timer läuft kontinuierlich. Richtige Entscheidung: +7 Sekunden. Falsche: �
 
 Drei zufallsgenerierte Patient:innen-Kacheln stehen zur Auswahl, eine ist die richtige. Trainiert Namens-/Diagnose-Zuordnung und Aufmerksamkeit.
 
-**🏃 Personalausfall** (5 % Chance) — Kollegin krank, sofort −2 s Zeitstrafe.
+**🏃 Personalausfall** (10 % Chance pro Runde) — Kollegin krank, sofort −2 s Zeitstrafe.
 
 ## XP & Stations-Karriere
 
@@ -83,11 +91,17 @@ Jede richtige Antwort zählt dauerhaft XP an, gespeichert im `localStorage` des 
 
 Start-Screen zeigt aktuelle Stufe + Fortschrittsbalken. End-Screen zeigt gesammelte XP dieser Schicht und Aufstiegs-Fanfare bei erreichter Stufe.
 
+**Progressive Schwierigkeit**: Die Karriere-Stufe bestimmt, welche Fallkategorien überhaupt vorkommen. 1. Jahr sieht nur Geschlecht/Alter-Fälle, mit jeder Stufe kommen mehr Kategorien dazu (Iso-Basics → psychosoziale Konflikte → 3MRGN/Immun → 4MRGN/Telemetrie → ab Pflegedirektion alles inkl. aerogener Isolation). Gilt für normale Runden und Identifikations-Events gleichermaßen.
+
+Zum gezielten Testen einzelner Stufen kann die XP einmalig per URL gesetzt werden, z. B. `?setxp=1500` — die URL räumt den Parameter danach selbst auf, die XP bleibt aber gespeichert.
+
 ## Didaktischer Hintergrund
 
 Das Spiel ist als **Übungsimpuls** konzipiert — es ersetzt keine Hygienepläne, Einrichtungs-Standards oder Stationsleitungs-Schulung. Regeln sind generalisiert, reale Entscheidungen hängen von Klinikstandard und Einzelfall ab.
 
 Das Prinzip ist **integriertes Entscheiden unter Zeitdruck** — die Kompetenz, an der Pflegefachkräfte im Alltag gemessen werden, die aber in der Ausbildung oft zu kurz kommt, weil sie im Skills Lab kaum simuliert werden kann. Das Endlos-Format und die variablen Belohnungen lehnen sich an Suchtmechaniken erfolgreicher Lern-Apps an — gezielt eingesetzt für kognitiven Transfer statt Inhaltsvermittlung.
+
+Eine bewusste Ausnahme von der Punkte-/Sound-Fanfare: bei korrekt gelöster Sterbebegleitung-Runde bleibt der sonst übliche Erfolgs-Sound aus. Der Inhalt bekommt keine Feier-Behandlung — auch nicht bei laufender Streak-Serie.
 
 ## Technik
 

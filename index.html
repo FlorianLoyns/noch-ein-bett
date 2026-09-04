@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-  <meta name="theme-color" content="#0d7377">
+  <meta name="theme-color" content="#080512">
 
   <title>Habt ihr noch ein Bett?</title>
   <meta name="description" content="Endloses Quiz zur Bettenzuweisung in der Pflege. Richtig = Zeitbonus. Wie weit kommst du?">
@@ -29,23 +29,32 @@
 
   <style>
     :root {
-      --teal: #0d7377;
-      --teal-dark: #0a5c5f;
-      --teal-soft: #d6ecec;
-      --teal-light: #e6f3f3;
-      --bg: #f6f8f7;
-      --bg2: #eaf2f1;
-      --card: #ffffff;
+      /* Markenfarbe: dunkel genug für Text auf hellen Karten (Kontrast!) */
+      --teal: oklch(0.50 0.23 350);
+      --teal-dark: oklch(0.40 0.22 350);
+      --teal-soft: oklch(0.88 0.01 296); /* neutral grau statt Farbe — nur bedeutungstragende Chips kriegen Farbe, s. Mockup */
+      --teal-light: oklch(0.91 0.06 350);
+      --bg:  oklch(0.13 0.03 296);
+      --bg2: oklch(0.205 0.05 300); /* = Mockup --panel */
+      --bg3: oklch(0.24 0.05 300);  /* = Mockup --panel-2, für Feedback-Panel etc. */
+      --card: oklch(0.985 0.006 296); /* = Mockup --card-light */
       --ink: #0b1818;
       --body: #2d3d3d;
       --muted: #6b7b7b;
       --border: #e4eae9;
-      --ok: #16a34a;
-      --ok-soft: #dcfce7;
-      --warn: #dc2626;
-      --warn-soft: #fef2f2;
-      --gold: #eab308;
-      /* Iso-Akzent-Palette (Station-Whiteboard Codes) */
+      --hard: oklch(0.10 0.03 296);
+      /* Neon-Akzente — EIN Farbsystem für Deko UND Bedeutung (richtig=Lime, falsch=Rot),
+         nicht zwei getrennte Paletten. Siehe Neon-Shift Mockup. */
+      --neon-lime:    oklch(0.88 0.23 128);
+      --neon-magenta: oklch(0.68 0.26 350);
+      --neon-cyan:    oklch(0.80 0.15 200);
+      --neon-violet:  oklch(0.58 0.23 300);
+      --neon-red:     oklch(0.62 0.22 25);
+      --gold: oklch(0.83 0.17 75); /* = Mockup --amber */
+      --ok:   var(--neon-lime);
+      --warn: var(--neon-red);
+      /* Iso-Akzent-Palette (Station-Whiteboard Codes) — bewusst NICHT neonisiert:
+         Patientensicherheits-Infos müssen von Marken-Deko unterscheidbar bleiben */
       --ac-kontakt: #dc2626;
       --ac-tropf:   #2563eb;
       --ac-immun:   #d97706;
@@ -54,19 +63,11 @@
       --ac-free:    #16a34a;
       --ac-stable:  #94a3b8;
     }
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg:#0f1714; --bg2:#141f1d; --card:#1a2826;
-        --ink:#e8f0ef; --body:#a8bcba; --muted:#6b7b7b;
-        --border:#243230; --teal-light:#1a3033; --teal-soft:#1e3d3f;
-        --ok-soft:#0d3a1f; --warn-soft:#3a2812;
-      }
-    }
     *, *::before, *::after { box-sizing: border-box; }
     html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
     body {
       margin: 0;
-      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       background: var(--bg);
       color: var(--body);
       font-size: 15px;
@@ -76,14 +77,29 @@
       user-select: none;
       touch-action: manipulation;
     }
+    .disp { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-weight: 800; letter-spacing: -0.01em; }
+    .sticker    { box-shadow: 5px 5px 0 var(--hard); border: 3px solid var(--hard); }
+    .sticker-sm { box-shadow: 3px 3px 0 var(--hard); border: 2.5px solid var(--hard); }
 
     @keyframes slide-in {
-      from { transform: translateX(100%); opacity: 0; }
-      to   { transform: translateX(0); opacity: 1; }
+      0%   { transform: translateX(115vw) rotate(var(--rot, 4deg)); opacity: 0; }
+      70%  { transform: translateX(-3%) rotate(calc(var(--rot, 4deg) * -0.2)); opacity: 1; }
+      100% { transform: translateX(0) rotate(0deg); }
+    }
+    @keyframes slide-in-left {
+      0%   { transform: translateX(-115vw) rotate(var(--rot, -4deg)); opacity: 0; }
+      70%  { transform: translateX(3%) rotate(calc(var(--rot, -4deg) * -0.2)); opacity: 1; }
+      100% { transform: translateX(0) rotate(0deg); }
     }
     @keyframes slide-up {
       from { transform: translateY(30px); opacity: 0; }
       to   { transform: translateY(0); opacity: 1; }
+    }
+    @keyframes card-drop {
+      0%   { transform: translateY(65vh) rotate(5deg) scale(0.92); opacity: 0; }
+      60%  { transform: translateY(-8px) rotate(-2deg) scale(1.03); opacity: 1; }
+      82%  { transform: translateY(3px) rotate(-0.3deg) scale(0.995); }
+      100% { transform: translateY(0) rotate(-0.7deg) scale(1); }
     }
     @keyframes pulse {
       0%, 100% { transform: scale(1); }
@@ -100,8 +116,15 @@
     }
     @keyframes shake {
       0%, 100% { transform: translateX(0); }
-      25%      { transform: translateX(-6px); }
-      75%      { transform: translateX(6px); }
+      20%      { transform: translateX(-9px) rotate(-1.2deg); }
+      40%      { transform: translateX(7px) rotate(1deg); }
+      60%      { transform: translateX(-5px) rotate(-0.6deg); }
+      80%      { transform: translateX(3px) rotate(0.4deg); }
+    }
+    @keyframes pop-correct {
+      0%   { transform: scale(1); }
+      40%  { transform: scale(1.045); }
+      100% { transform: scale(1); }
     }
     @keyframes trophy-pop {
       0%   { transform: scale(0.5) rotate(-15deg); opacity: 0; }
@@ -133,7 +156,10 @@
 
     /* ===== Start Screen ===== */
     #startScreen {
-      background: linear-gradient(135deg, #0d7377 0%, #064548 100%);
+      background:
+        radial-gradient(circle at 15% 15%, oklch(0.30 0.10 300 / 0.55) 0%, transparent 45%),
+        radial-gradient(circle at 85% 80%, oklch(0.28 0.12 350 / 0.45) 0%, transparent 50%),
+        var(--bg);
       color: #fff;
       align-items: center;
       justify-content: center;
@@ -147,11 +173,12 @@
       margin-bottom: 14px;
     }
     #startScreen h1 {
-      font-size: clamp(32px, 9vw, 48px);
-      font-weight: 900;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-size: clamp(30px, 8vw, 44px);
+      font-weight: 800;
       margin: 0 0 16px;
-      letter-spacing: -0.02em;
-      line-height: 1.05;
+      letter-spacing: -0.01em;
+      line-height: 1.12;
       max-width: 400px;
     }
     #startScreen p {
@@ -162,29 +189,40 @@
     }
     .start-btn {
       margin-top: 28px;
-      background: #fff;
-      color: var(--teal);
-      border: 0;
+      background: var(--neon-lime);
+      color: var(--hard);
+      border: 3px solid var(--hard);
       padding: 16px 32px;
       border-radius: 14px;
       font-weight: 800;
       font-size: 17px;
       cursor: pointer;
-      font-family: inherit;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-      transition: transform 0.15s;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      letter-spacing: 0.01em;
+      box-shadow: 5px 5px 0 var(--hard);
+      transition: transform 0.12s, box-shadow 0.12s;
     }
-    .start-btn:active { transform: translateY(1px); }
+    .start-btn:active { transform: translate(3px, 3px); box-shadow: 2px 2px 0 var(--hard); }
+    @keyframes btn-breathe {
+      0%, 100% { transform: scale(1) rotate(0deg); }
+      50%      { transform: scale(1.035) rotate(-0.6deg); }
+    }
+    .start-btn { animation: btn-breathe 1.6s ease-in-out infinite; }
+    @media (prefers-reduced-motion: reduce) {
+      .start-btn, .streak-chip.fire { animation: none !important; }
+    }
     .rules-note {
       margin-top: 22px;
       font-size: 12.5px;
-      opacity: 0.88;
-      background: rgba(255,255,255,0.08);
+      opacity: 0.92;
+      background: var(--bg2);
       padding: 12px 14px;
       border-radius: 10px;
       line-height: 1.6;
       max-width: 340px;
       text-align: left;
+      border: 2px solid var(--hard);
+      box-shadow: 2px 2px 0 var(--hard);
     }
     .rules-note .rule-row {
       display: flex;
@@ -196,19 +234,24 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: rgba(255,255,255,0.12);
+      background: var(--bg2);
       padding: 8px 16px;
       border-radius: 999px;
       margin-top: 18px;
       font-size: 13px;
       font-weight: 700;
+      border: 2.5px solid var(--hard);
+      box-shadow: 3px 3px 0 var(--hard);
     }
     .hs-pill .hs-label { opacity: 0.7; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; }
     .hs-pill .hs-val { color: var(--gold); font-size: 16px; font-weight: 900; }
 
     /* ===== Quiz Screen ===== */
     #quizScreen {
-      background: var(--bg);
+      background:
+        radial-gradient(circle at 90% 8%, oklch(0.30 0.13 200 / 0.30) 0%, transparent 42%),
+        radial-gradient(circle at 5% 92%, oklch(0.28 0.12 300 / 0.35) 0%, transparent 48%),
+        var(--bg);
       padding: 12px 14px 0;
       padding-top: max(12px, env(safe-area-inset-top));
       gap: 10px;
@@ -221,9 +264,10 @@
       align-items: center;
       gap: 8px;
       padding: 8px 10px;
-      background: linear-gradient(135deg, #0d7377 0%, #0a5c5f 100%);
+      background: var(--bg2);
       border-radius: 18px;
-      box-shadow: 0 6px 18px rgba(13,115,119,0.25), inset 0 1px 0 rgba(255,255,255,0.18);
+      box-shadow: 5px 5px 0 var(--hard);
+      border: 3px solid var(--hard);
       color: #fff;
       flex-shrink: 0;
     }
@@ -239,7 +283,7 @@
       position: absolute;
       inset: 0;
       height: 100%;
-      background: linear-gradient(90deg, #4ade80 0%, #16a34a 60%, #65a30d 100%);
+      background: linear-gradient(90deg, var(--neon-lime) 0%, var(--neon-cyan) 100%);
       width: 100%;
       transition: width 0.1s linear, background 0.3s;
       border-radius: 12px;
@@ -263,8 +307,9 @@
       align-items: center;
       justify-content: center;
       gap: 4px;
-      font-weight: 900;
-      font-size: 17px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-weight: 800;
+      font-size: 15px;
       color: #fff;
       text-shadow: 0 1px 3px rgba(0,0,0,0.45);
       letter-spacing: 0.3px;
@@ -290,8 +335,9 @@
       line-height: 1;
     }
     .score-pod .sp-val {
-      font-size: 22px;
-      font-weight: 900;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-size: 19px;
+      font-weight: 800;
       line-height: 1;
       letter-spacing: -0.02em;
       font-variant-numeric: tabular-nums;
@@ -300,7 +346,7 @@
     .score-pod .sp-val.bump { transform: scale(1.18); color: #fde68a; }
 
     .streak-chip {
-      background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
+      background: var(--neon-red);
       color: #fff;
       padding: 6px 10px 6px 8px;
       border-radius: 999px;
@@ -309,17 +355,23 @@
       display: none;
       align-items: center;
       gap: 3px;
-      box-shadow: 0 3px 10px rgba(234,88,12,0.45), inset 0 1px 0 rgba(255,255,255,0.3);
+      border: 2px solid var(--hard);
+      box-shadow: 2px 2px 0 var(--hard);
       animation: streak-pulse 1s ease-in-out infinite;
       letter-spacing: 0.3px;
       line-height: 1;
     }
     .streak-chip.visible { display: inline-flex; }
     .streak-chip.hot { background: linear-gradient(135deg, #dc2626 0%, #7c1d6f 100%); }
-    .streak-chip.fire { background: linear-gradient(135deg, #fbbf24 0%, #dc2626 50%, #7c1d6f 100%); }
+    .streak-chip.fire { background: linear-gradient(135deg, #fbbf24 0%, #dc2626 50%, #7c1d6f 100%); animation: fire-shimmy 0.6s ease-in-out infinite; }
     @keyframes streak-pulse {
-      0%, 100% { transform: scale(1); box-shadow: 0 3px 10px rgba(234,88,12,0.45), inset 0 1px 0 rgba(255,255,255,0.3); }
-      50%      { transform: scale(1.06); box-shadow: 0 5px 16px rgba(234,88,12,0.65), inset 0 1px 0 rgba(255,255,255,0.4); }
+      0%, 100% { transform: scale(1) rotate(0deg); box-shadow: 2px 2px 0 var(--hard), 0 0 0px rgba(224,73,46,0.6); }
+      50%      { transform: scale(1.07) rotate(-2deg); box-shadow: 2px 2px 0 var(--hard), 0 0 16px rgba(224,73,46,0.75); }
+    }
+    @keyframes fire-shimmy {
+      0%, 100% { transform: scale(1.07) rotate(-2deg); }
+      25%      { transform: scale(1.09) rotate(3deg); }
+      75%      { transform: scale(1.09) rotate(-5deg); }
     }
     .streak-chip .sf-emoji { font-size: 14px; line-height: 1; }
     .streak-chip .sf-num   { font-variant-numeric: tabular-nums; }
@@ -337,29 +389,42 @@
     /* ===== Patient Card (visuell hervorgehoben) ===== */
     .patient-card {
       position: relative;
-      background: linear-gradient(135deg, #ffffff 0%, #e8f3f2 100%);
+      background: var(--card);
       border-radius: 18px;
-      padding: 14px 16px 12px;
-      border: 1px solid #c7dedc;
-      box-shadow: 0 8px 22px rgba(13, 115, 119, 0.16), 0 2px 6px rgba(15, 31, 31, 0.06);
-      animation: slide-up 0.25s ease-out;
+      padding: 18px 16px 12px;
+      border: 3px solid var(--hard);
+      box-shadow: 5px 5px 0 var(--hard);
+      animation: card-drop 0.42s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transform: rotate(-0.7deg);
       flex-shrink: 0;
       cursor: grab;
       touch-action: none;
       transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s;
       will-change: transform;
+      overflow: hidden;
     }
-    /* Kleine "Aufnahme"-Markierung oben rechts, damit klar ist: das ist die Aufnahme */
+    .patient-card::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 6px;
+      background: linear-gradient(90deg, var(--neon-magenta), var(--neon-cyan));
+    }
+    /* "Aufnahme"-Markierung oben rechts, damit klar ist: das ist die Aufnahme */
     .patient-card::after {
       content: "AUFNAHME";
       position: absolute;
-      top: 10px;
+      top: 14px;
       right: 12px;
-      font-size: 9px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-size: 9.5px;
       font-weight: 900;
-      letter-spacing: 1.4px;
-      color: var(--teal);
-      opacity: 0.55;
+      letter-spacing: 1px;
+      color: var(--hard);
+      background: var(--neon-lime);
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 2px solid var(--hard);
     }
     .patient-card:active { cursor: grabbing; }
     .patient-card.dragging {
@@ -385,46 +450,38 @@
       gap: 4px;
       opacity: 0.7;
     }
-    .pg-badge {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      width: 52px;
-      height: 52px;
-      border-radius: 50%;
-      color: #fff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      font-weight: 900;
-      line-height: 1;
-    }
-    .pg-badge.pg-1 { background: linear-gradient(135deg, #65a30d 0%, #4d7c0f 100%); box-shadow: 0 3px 10px rgba(77,124,15,0.4); }
-    .pg-badge.pg-2 { background: linear-gradient(135deg, #0d7377 0%, #0a5c5f 100%); box-shadow: 0 3px 10px rgba(13,115,119,0.4); }
-    .pg-badge.pg-3 { background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%); box-shadow: 0 3px 10px rgba(180,83,9,0.4); }
-    .pg-badge.pg-4 { background: linear-gradient(135deg, #ea580c 0%, #9a3412 100%); box-shadow: 0 3px 10px rgba(154,52,18,0.4); }
-    .pg-badge.pg-5 { background: linear-gradient(135deg, #dc2626 0%, #7f1d1d 100%); box-shadow: 0 3px 10px rgba(127,29,29,0.4); }
-    .pg-badge .pg-label { font-size: 8.5px; letter-spacing: 0.8px; opacity: 0.85; margin-bottom: 1px; }
-    .pg-badge .pg-num { font-size: 24px; font-weight: 900; letter-spacing: -0.03em; }
     .patient-card h2 {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       margin: 0 0 2px;
       font-size: 21px;
       font-weight: 800;
       color: var(--ink);
       letter-spacing: -0.01em;
-      line-height: 1.1;
-      padding-right: 76px; /* Platz für AUFNAHME-Label */
+      line-height: 1.15;
+      padding-right: 84px; /* Platz für AUFNAHME-Label */
+      position: relative;
+      display: inline-block;
+    }
+    .patient-card h2::after {
+      content: "";
+      position: absolute;
+      left: 1px; bottom: -3px;
+      width: 34px; height: 4px;
+      border-radius: 999px;
+      background: var(--neon-magenta);
     }
     .patient-card .meta {
       color: var(--muted);
-      font-size: 14.5px;
-      margin-bottom: 4px;
-      font-weight: 600;
+      font-size: 13px;
+      margin-top: 8px;
+      margin-bottom: 3px;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
     }
     .patient-card .diag {
       color: var(--ink);
-      font-size: 14.5px;
+      font-size: 15px;
       font-weight: 700;
       margin-bottom: 4px;
       line-height: 1.3;
@@ -439,8 +496,9 @@
       min-height: 0;
     }
     .option {
+      position: relative;
       background: var(--card);
-      border: 2px solid var(--border);
+      border: 2.5px solid var(--hard);
       border-radius: 14px;
       padding: 12px 14px;
       cursor: pointer;
@@ -452,21 +510,34 @@
       gap: 10px;
       min-height: 0;
       overflow: hidden;
-      animation: slide-in 0.22s ease-out;
       animation-fill-mode: backwards;
-      box-shadow: 0 2px 6px rgba(15,31,31,0.04);
+      box-shadow: 3px 3px 0 var(--hard);
       width: 100%;
     }
-    .option:nth-child(1) { animation-delay: 0.02s; }
-    .option:nth-child(2) { animation-delay: 0.06s; }
-    .option:nth-child(3) { animation-delay: 0.10s; }
-    .option:active { transform: scale(0.98); }
+    .option.dir-r { animation: slide-in 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+    .option.dir-l { animation: slide-in-left 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+    .option:nth-child(1) { animation-delay: 0s; }
+    .option:nth-child(2) { animation-delay: 0.1s; }
+    .option:nth-child(3) { animation-delay: 0.2s; }
+    .option:nth-child(4) { animation-delay: 0.3s; }
+    .option:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--hard); }
     .option:hover { border-color: var(--teal); }
-    .option.correct { border-color: var(--ok); background: var(--ok-soft); box-shadow: 0 4px 14px rgba(22,163,74,0.18); }
-    .option.wrong   { border-color: var(--warn); background: var(--warn-soft); animation: shake 0.35s; box-shadow: 0 4px 14px rgba(220,38,38,0.18); }
+    .option.correct { border-color: var(--hard); background: var(--neon-lime); box-shadow: 3px 3px 0 var(--hard); animation: pop-correct 0.4s ease-out; }
+    .option.correct .opt-top, .option.correct .opt-main { color: var(--hard); }
+    .option.wrong   { border-color: var(--hard); background: var(--neon-red); animation: shake 0.35s; box-shadow: 3px 3px 0 var(--hard); }
+    .option.wrong .opt-top, .option.wrong .opt-main { color: #fff; }
+    /* Nicht nur Farbe: Icon ergänzt richtig/falsch für Rot-Grün-Sehschwäche */
+    .option.correct::after, .option.wrong::after {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; position: absolute; top: 8px; right: 10px;
+      font-size: 13px; font-weight: 800; width: 22px; height: 22px; border-radius: 999px;
+      display: flex; align-items: center; justify-content: center; color: #fff;
+    }
+    .option.correct::after { content: "✓"; background: var(--hard); color: var(--neon-lime); }
+    .option.wrong::after   { content: "✕"; background: var(--hard); color: #fff; }
     .option.disabled { pointer-events: none; }
     .option.disabled:not(.correct):not(.wrong) { opacity: 0.4; }
     .option .opt-body { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 3px; }
+    .option.correct .opt-body, .option.wrong .opt-body { padding-right: 26px; }
     .opt-top {
       font-size: 10.5px;
       font-weight: 800;
@@ -481,13 +552,13 @@
       line-height: 1.2;
       letter-spacing: -0.005em;
     }
-    .option.is-empty .opt-main { font-size: 17px; color: var(--ok); }
+    .option.is-empty .opt-main { font-size: 17px; color: var(--ink); }
     .opt-empty-icon {
       width: 38px;
       height: 38px;
       border-radius: 12px;
-      background: var(--ok-soft);
-      color: var(--ok);
+      background: var(--neon-lime);
+      color: var(--hard);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -510,7 +581,7 @@
       font-weight: 700;
       letter-spacing: 0.2px;
       background: var(--teal-soft);
-      color: var(--teal-dark);
+      color: oklch(0.40 0.02 296);
       white-space: nowrap;
       line-height: 1.5;
     }
@@ -524,26 +595,18 @@
     }
     /* Obere Karte: Icons deutlich größer */
     .patient-card .meta .sex-ico { font-size: 24px; vertical-align: -3px; }
-    .patient-card .drag-arrow { font-size: 20px; vertical-align: -2px; }
-    .drag-arrow {
-      font-size: 16px;
-      font-weight: 900;
-      margin-right: 5px;
-      vertical-align: -1px;
-    }
-    .mini-chip.warn    { background: #fee2e2; color: #991b1b; }
-    .mini-chip.alert   { background: #fef3c7; color: #854d0e; }
-    .mini-chip.dark    { background: #1e3a3a; color: #fff; }
-    .mini-chip.ok      { background: #dcfce7; color: #14532d; }
-    .mini-chip.neutral { background: #e5e7eb; color: #374151; }
-    .mini-chip.pg      { background: #0d7377; color: #fff; font-weight: 800; }
+    .mini-chip.warn    { background: var(--neon-red); color: #fff; }
+    .mini-chip.alert   { background: var(--gold); color: var(--hard); }
+    .mini-chip.dark    { background: var(--hard); color: rgba(255,255,255,0.85); }
+    .mini-chip.ok      { background: var(--hard); color: var(--neon-lime); }
+    .mini-chip.neutral { background: var(--teal-soft); color: oklch(0.40 0.02 296); }
 
     /* Patient-Karte Flags */
     .flags {
       display: flex;
       flex-wrap: wrap;
-      gap: 5px;
-      margin-top: 6px;
+      gap: 6px;
+      margin-top: 2px;
     }
     .flag {
       padding: 3px 9px;
@@ -551,40 +614,41 @@
       font-size: 11px;
       font-weight: 700;
       background: var(--teal-soft);
-      color: var(--teal-dark);
+      color: oklch(0.40 0.02 296);
     }
-    .flag.warn  { background: #fee2e2; color: #991b1b; }
-    .flag.alert { background: #fef3c7; color: #854d0e; }
-    .flag.dark  { background: #1e3a3a; color: #fff; }
+    .flag.warn  { background: var(--neon-red); color: #fff; }
+    .flag.alert { background: var(--gold); color: var(--hard); }
+    .flag.dark  { background: var(--hard); color: rgba(255,255,255,0.85); }
 
     /* ===== Feedback: fester reservierter Bereich unten — keine Layout-Verschiebung ===== */
     .feedback {
       flex-shrink: 0;
-      min-height: 92px;
-      max-height: 32vh;
+      height: 104px;
       margin: 0 -14px;
       padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
       border-radius: 18px 18px 0 0;
       font-size: 13.5px;
       line-height: 1.42;
-      background: #ffffff;
-      box-shadow: 0 -8px 24px rgba(0,0,0,0.10);
+      background: var(--bg3);
+      box-shadow: 0 -8px 24px rgba(0,0,0,0.35);
       transition: background 0.25s, color 0.25s, box-shadow 0.25s;
       overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
       display: flex;
       flex-direction: column;
-      justify-content: center;
-      color: var(--body);
+      justify-content: flex-start;
+      color: rgba(255,255,255,0.85);
     }
     .feedback.idle {
-      background: linear-gradient(180deg, #ffffff 0%, #f0f6f5 100%);
-      color: var(--muted);
+      background: var(--bg3);
+      color: rgba(255,255,255,0.55);
       text-align: center;
     }
-    .feedback.idle .fb-head { color: var(--teal); font-size: 12px; letter-spacing: 1.4px; text-transform: uppercase; font-weight: 900; margin-bottom: 4px; }
-    .feedback.idle .fb-hint { font-size: 13px; opacity: 0.85; }
-    .feedback.ok  { background: linear-gradient(180deg, var(--ok-soft) 0%, #c4f4d3 100%); border-top: 4px solid var(--ok);  color: #14532d; animation: fb-pop 0.32s ease-out; }
-    .feedback.bad { background: linear-gradient(180deg, var(--warn-soft) 0%, #fcd0d0 100%); border-top: 4px solid var(--warn); color: #7f1d1d; animation: fb-pop 0.32s ease-out; }
+    .feedback.idle .fb-head { color: #fff; font-size: 12px; letter-spacing: 1.4px; text-transform: uppercase; font-weight: 900; margin-bottom: 4px; opacity: 0.85; }
+    .feedback.idle .fb-hint { font-size: 13px; opacity: 0.75; }
+    .feedback.ok    { background: var(--bg3); color: rgba(255,255,255,0.85); animation: fb-pop 0.32s ease-out; }
+    .feedback.bad   { background: var(--bg3); color: rgba(255,255,255,0.85); animation: fb-pop 0.32s ease-out; }
+    .feedback.alert { background: var(--bg3); color: rgba(255,255,255,0.85); animation: fb-pop 0.32s ease-out; }
     .feedback .fb-head {
       display: flex;
       align-items: center;
@@ -605,8 +669,12 @@
       flex-shrink: 0;
       color: #fff;
     }
-    .feedback.ok .fb-head .fb-icon { background: var(--ok); }
-    .feedback.bad .fb-head .fb-icon { background: var(--warn); }
+    .feedback.ok .fb-head { color: var(--neon-lime); }
+    .feedback.ok .fb-head .fb-icon { background: var(--neon-lime); color: var(--hard); }
+    .feedback.bad .fb-head { color: var(--neon-red); }
+    .feedback.bad .fb-head .fb-icon { background: var(--neon-red); color: #fff; }
+    .feedback.alert .fb-head { color: var(--gold); }
+    .feedback.alert .fb-head .fb-icon { background: var(--gold); color: var(--hard); }
     .feedback .fb-head .fb-delta {
       margin-left: auto;
       font-size: 13px;
@@ -617,18 +685,22 @@
       letter-spacing: 0.2px;
       font-variant-numeric: tabular-nums;
     }
-    .feedback.ok  .fb-head .fb-delta { background: rgba(22,163,74,0.18); }
-    .feedback.bad .fb-head .fb-delta { background: rgba(220,38,38,0.16); }
+    .feedback.ok  .fb-head .fb-delta { background: rgba(190,242,100,0.22); }
+    .feedback.bad .fb-head .fb-delta { background: rgba(224,90,50,0.28); }
     .feedback .fb-body { font-size: 13.5px; line-height: 1.42; }
     .feedback .fb-correct { display: block; margin-top: 4px; font-size: 12.5px; font-style: italic; opacity: 0.92; }
     @keyframes fb-pop {
-      0%   { transform: scale(0.985); opacity: 0.85; }
-      100% { transform: scale(1); opacity: 1; }
+      0%   { transform: translateY(28px) scale(0.98); opacity: 0; }
+      65%  { transform: translateY(-4px) scale(1.005); opacity: 1; }
+      100% { transform: translateY(0) scale(1); }
     }
 
     /* ===== End Screen ===== */
     #endScreen {
-      background: linear-gradient(135deg, #0d7377 0%, #064548 100%);
+      background:
+        radial-gradient(circle at 80% 10%, oklch(0.32 0.14 128 / 0.35) 0%, transparent 45%),
+        radial-gradient(circle at 10% 85%, oklch(0.28 0.12 350 / 0.45) 0%, transparent 50%),
+        var(--bg);
       color: #fff;
       justify-content: center;
       align-items: center;
@@ -647,19 +719,22 @@
       margin-bottom: 10px;
     }
     #endScreen h2 {
-      font-size: 28px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-size: 20px;
       margin: 0 0 4px;
-      font-weight: 900;
-      letter-spacing: -0.01em;
+      font-weight: 700;
+      color: var(--neon-magenta);
     }
     #endScreen .big-score {
-      font-size: 96px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-size: 84px;
       font-weight: 900;
       line-height: 1;
       margin: 20px 0 6px;
-      color: #fff;
+      color: var(--neon-lime);
       font-variant-numeric: tabular-nums;
-      letter-spacing: -0.04em;
+      letter-spacing: -0.02em;
+      text-shadow: 4px 4px 0 var(--hard);
     }
     #endScreen .score-detail {
       opacity: 0.85;
@@ -685,37 +760,48 @@
       font-size: 13px;
     }
     #endScreen .stat {
-      background: rgba(255,255,255,0.1);
+      background: #ffffff;
       padding: 10px;
-      border-radius: 10px;
+      border-radius: 12px;
+      border: 2.5px solid var(--hard);
+      box-shadow: 3px 3px 0 var(--hard);
     }
     #endScreen .stat .stat-label {
-      opacity: 0.7;
-      font-size: 10.5px;
+      color: var(--muted);
+      opacity: 1;
+      font-size: 10px;
       letter-spacing: 1px;
       text-transform: uppercase;
+      font-weight: 800;
       margin-bottom: 4px;
     }
     #endScreen .stat .stat-val {
-      font-size: 18px;
-      font-weight: 900;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      color: var(--ink);
+      font-size: 17px;
+      font-weight: 800;
     }
     #endScreen button {
       width: 100%;
       padding: 14px;
       border: 0;
-      border-radius: 12px;
+      border-radius: 14px;
       font-weight: 800;
       font-size: 15px;
       cursor: pointer;
-      font-family: inherit;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       margin-top: 8px;
-      transition: transform 0.12s;
+      transition: transform 0.12s, box-shadow 0.12s;
     }
-    #endScreen button:active { transform: translateY(1px); }
-    #endScreen button.primary { background: #fff; color: var(--teal); }
-    #endScreen button.share   { background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.25); }
-    #endScreen button.secondary { background: transparent; color: rgba(255,255,255,0.6); }
+    #endScreen button.primary,
+    #endScreen button.share {
+      border: 3px solid var(--hard);
+      box-shadow: 4px 4px 0 var(--hard);
+    }
+    #endScreen button:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 var(--hard) !important; }
+    #endScreen button.primary { background: var(--neon-magenta); color: var(--hard); }
+    #endScreen button.share   { background: var(--neon-cyan); color: var(--hard); }
+    #endScreen button.secondary { background: transparent; color: rgba(255,255,255,0.6); box-shadow: none; }
     .share-toast {
       position: fixed;
       bottom: 30px;
@@ -743,15 +829,16 @@
       font-variant-numeric: tabular-nums;
       white-space: nowrap;
     }
-    .score-float.plus  { color: var(--ok); }
-    .score-float.minus { color: var(--warn); }
+    .score-float.plus  { color: var(--neon-lime); text-shadow: 2px 2px 0 var(--hard); }
+    .score-float.minus { color: var(--neon-red); text-shadow: 2px 2px 0 var(--hard); }
 
     /* ===== Golden Patient ===== */
     .patient-card.golden {
       background: linear-gradient(135deg, #fff8dc 0%, #ffffff 70%);
       box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.35), 0 6px 24px rgba(234, 179, 8, 0.35);
-      animation: slide-up 0.25s ease-out, golden-pulse 1.6s ease-in-out infinite;
+      animation: card-drop 0.42s cubic-bezier(0.34, 1.56, 0.64, 1), golden-pulse 1.6s ease-in-out infinite;
     }
+    .patient-card.golden::before { display: none; }
     @keyframes golden-pulse {
       0%, 100% { box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.35), 0 6px 24px rgba(234, 179, 8, 0.25); }
       50%      { box-shadow: 0 0 0 5px rgba(234, 179, 8, 0.55), 0 8px 30px rgba(234, 179, 8, 0.45); }
@@ -778,20 +865,109 @@
       top: 35%;
       left: 50%;
       transform: translate(-50%, -50%) scale(0);
-      padding: 22px 34px;
-      border-radius: 22px;
+      padding: 20px 32px;
+      border-radius: 20px;
       text-align: center;
       z-index: 300;
       color: #fff;
-      box-shadow: 0 14px 40px rgba(0,0,0,0.35);
+      border: 3px solid var(--hard);
+      box-shadow: 6px 6px 0 var(--hard);
       animation: banner-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
       pointer-events: none;
       max-width: 320px;
     }
-    .trigger-banner.rush     { background: linear-gradient(135deg, #f59e0b 0%, #dc2626 100%); }
-    .trigger-banner.schwarm  { background: linear-gradient(135deg, #0d7377 0%, #7c3aed 100%); }
-    .trigger-banner.pause    { background: linear-gradient(135deg, #78350f 0%, #3b2414 100%); }
-    .trigger-banner.personal { background: linear-gradient(135deg, #475569 0%, #1e293b 100%); }
+    .trigger-banner.rush     { background: var(--gold); color: var(--hard); }
+    .trigger-banner.schwarm  { background: var(--neon-cyan); color: var(--hard); }
+    .trigger-banner.pause    { background: var(--bg3); color: rgba(255,255,255,0.9); }
+    .trigger-banner.personal { background: var(--bg3); color: rgba(255,255,255,0.9); }
+    .trigger-banner.notfall  { background: var(--neon-red); color: var(--hard); animation: notfall-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+    @keyframes notfall-pop {
+      0%   { transform: translate(-50%, -50%) scale(0) rotate(-8deg); opacity: 0; }
+      55%  { transform: translate(-50%, -50%) scale(1.12) rotate(2deg); opacity: 1; }
+      70%  { transform: translate(-50%, -50%) scale(1) rotate(-3deg); }
+      80%  { transform: translate(-50%, -50%) scale(1) rotate(3deg); }
+      90%  { transform: translate(-50%, -50%) scale(1) rotate(-1.5deg); }
+      100% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
+    }
+    #optionsContainer.locked-out .option {
+      pointer-events: none;
+      filter: grayscale(0.6) brightness(0.55);
+      transition: filter 0.15s;
+    }
+    #optionsContainer.locked-out .option::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 14px;
+      border: 3px solid var(--neon-red);
+      animation: lockout-pulse 0.7s ease-in-out infinite;
+      pointer-events: none;
+    }
+    @keyframes lockout-pulse {
+      0%, 100% { opacity: 0.35; }
+      50%      { opacity: 0.9; }
+    }
+    .option.cancelled {
+      pointer-events: none;
+      opacity: 0.65;
+      position: relative;
+      animation: cancel-shake 0.4s ease-out;
+    }
+    @keyframes cancel-shake {
+      0%   { transform: translateX(0) rotate(0deg); }
+      20%  { transform: translateX(-5px) rotate(-1.3deg); }
+      50%  { transform: translateX(4px) rotate(1deg); }
+      75%  { transform: translateX(-2px) rotate(-0.4deg); }
+      100% { transform: translateX(0) rotate(0deg); }
+    }
+    .option.cancelled .opt-top,
+    .option.cancelled .opt-main {
+      filter: grayscale(0.6);
+      opacity: 0.75;
+    }
+    .option.cancelled::before {
+      content: "STORNIERT";
+      position: absolute;
+      top: 50%; left: 50%;
+      z-index: 2;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-weight: 900;
+      font-size: 14px;
+      letter-spacing: 1px;
+      white-space: nowrap;
+      color: var(--neon-red);
+      background: var(--card);
+      border: 2.5px solid var(--neon-red);
+      box-shadow: 3px 3px 0 var(--hard);
+      padding: 6px 15px;
+      border-radius: 9px;
+      opacity: 0;
+      transform: translate(-50%, -50%) rotate(-9deg) scale(2.4);
+      animation: stamp-in 0.4s 0.12s cubic-bezier(0.32, 1.7, 0.5, 1) forwards;
+    }
+    .option.cancelled::after {
+      content: "";
+      position: absolute;
+      top: 50%; left: 50%;
+      z-index: 1;
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      border: 3px solid var(--neon-red);
+      transform: translate(-50%, -50%) scale(0.3);
+      opacity: 0;
+      animation: stamp-ring 0.55s 0.15s ease-out forwards;
+      pointer-events: none;
+    }
+    @keyframes stamp-in {
+      0%   { opacity: 0; transform: translate(-50%, -50%) rotate(-9deg) scale(2.4); }
+      55%  { opacity: 1; transform: translate(-50%, -50%) rotate(-11deg) scale(0.8); }
+      75%  { transform: translate(-50%, -50%) rotate(-6deg) scale(1.08); }
+      100% { opacity: 1; transform: translate(-50%, -50%) rotate(-9deg) scale(1); }
+    }
+    @keyframes stamp-ring {
+      0%   { transform: translate(-50%, -50%) scale(0.3); opacity: 0.85; }
+      100% { transform: translate(-50%, -50%) scale(2.4); opacity: 0; }
+    }
 
     /* ===== Identifikations-Event ===== */
     .patient-card.is-event {
@@ -844,18 +1020,20 @@
       animation: pulse 1s ease-in-out infinite;
       box-shadow: 0 3px 10px rgba(0,0,0,0.18);
     }
-    .mode-chip.rush    { background: linear-gradient(135deg, #f59e0b, #dc2626); }
-    .mode-chip.schwarm { background: linear-gradient(135deg, #0d7377, #7c3aed); }
+    .mode-chip.rush    { background: var(--gold); color: var(--hard); }
+    .mode-chip.schwarm { background: var(--neon-cyan); color: var(--hard); }
 
     /* ===== XP-System (Start/End) ===== */
     .xp-box {
-      background: rgba(255,255,255,0.1);
+      background: var(--card);
       padding: 14px 16px;
       border-radius: 14px;
       margin-top: 16px;
       max-width: 340px;
       width: 100%;
       text-align: left;
+      border: 2.5px solid var(--hard);
+      box-shadow: 3px 3px 0 var(--hard);
     }
     .xp-box .xp-level {
       font-size: 13px;
@@ -867,18 +1045,19 @@
       justify-content: space-between;
       align-items: baseline;
     }
-    .xp-box .xp-level-name { color: var(--gold); }
-    .xp-box .xp-nums { opacity: 0.75; font-size: 11px; font-weight: 700; }
+    .xp-box .xp-level-name { color: var(--ink); }
+    .xp-box .xp-nums { color: var(--muted); opacity: 1; font-size: 11px; font-weight: 700; }
     .xp-bar {
-      height: 8px;
-      background: rgba(255,255,255,0.15);
-      border-radius: 4px;
+      height: 10px;
+      background: oklch(0.88 0.01 296);
+      border: 2px solid var(--hard);
+      border-radius: 999px;
       overflow: hidden;
       margin-bottom: 6px;
     }
     .xp-bar-fill {
       height: 100%;
-      background: linear-gradient(90deg, #eab308 0%, #f59e0b 100%);
+      background: linear-gradient(90deg, var(--neon-lime) 0%, var(--neon-cyan) 100%);
       transition: width 0.8s ease-out;
       border-radius: 4px;
     }
@@ -1046,26 +1225,41 @@ function initAudio() {
   if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
   if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
 }
-function beep(freq, dur, type="sine", vol=0.22, delay=0) {
+function beep(freq, dur, type="sine", vol=0.22, delay=0, slideTo=null) {
   if (muted || !audioCtx) return;
   setTimeout(() => {
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
-    osc.type = type; osc.frequency.value = freq;
+    osc.type = type;
+    const t0 = audioCtx.currentTime;
+    osc.frequency.setValueAtTime(freq, t0);
+    if (slideTo) osc.frequency.exponentialRampToValueAtTime(slideTo, t0 + dur/1000);
     osc.connect(gain); gain.connect(audioCtx.destination);
-    const now = audioCtx.currentTime;
-    gain.gain.setValueAtTime(vol, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + dur/1000);
-    osc.start(now); osc.stop(now + dur/1000);
+    gain.gain.setValueAtTime(vol, t0);
+    gain.gain.exponentialRampToValueAtTime(0.001, t0 + dur/1000);
+    osc.start(t0); osc.stop(t0 + dur/1000);
   }, delay);
 }
+const jitter = () => 0.98 + Math.random() * 0.04; // leichte Tonhöhen-Streuung, klingt nicht jedes Mal identisch/roboterhaft
 const snd = {
-  tap:     () => beep(600, 40, "sine", 0.13),
-  correct: () => { beep(659, 70); beep(784, 70, "sine", 0.22, 80); beep(988, 130, "sine", 0.22, 160); },
-  wrong:   () => { beep(220, 180, "sawtooth", 0.15); beep(180, 220, "sawtooth", 0.13, 80); },
-  streak:  () => { beep(988, 60, "sine", 0.2); beep(1175, 60, "sine", 0.2, 60); beep(1397, 120, "sine", 0.2, 120); },
-  bell:    () => { beep(820, 60, "sine", 0.2); beep(1040, 80, "sine", 0.18, 80); beep(820, 60, "sine", 0.16, 180); },
-  gameover:() => { beep(440, 200, "sawtooth", 0.2); beep(349, 250, "sawtooth", 0.18, 200); beep(262, 400, "sawtooth", 0.16, 450); },
+  tap:      () => beep(650, 35, "square", 0.11),
+  correct:  () => {
+    if (Math.random() < 0.12) { snd.correctSurprise(); return; } // ab und zu ein Überraschungston statt des Standard-Jingles
+    beep(659 * jitter(), 65, "triangle", 0.22);
+    beep(784 * jitter(), 65, "triangle", 0.22, 75);
+    beep(988 * jitter(), 130, "triangle", 0.24, 150);
+  },
+  correctSurprise: () => {
+    beep(523, 50, "square", 0.16);
+    beep(659, 50, "square", 0.16, 50);
+    beep(784, 50, "square", 0.17, 100);
+    beep(1047, 50, "square", 0.18, 150);
+    beep(1319, 170, "square", 0.24, 200, 1568);
+  },
+  wrong:    () => { beep(230, 170, "sawtooth", 0.16, 0, 140); beep(180, 230, "sawtooth", 0.14, 90, 90); },
+  streak:   () => { beep(988 * jitter(), 55, "square", 0.19); beep(1175 * jitter(), 55, "square", 0.19, 55); beep(1397 * jitter(), 120, "square", 0.21, 110); },
+  bell:     () => { beep(820, 55, "triangle", 0.2); beep(1040, 75, "triangle", 0.18, 75); beep(820, 55, "triangle", 0.16, 170); },
+  gameover: () => { beep(440, 200, "sawtooth", 0.2); beep(349, 250, "sawtooth", 0.18, 200); beep(262, 400, "sawtooth", 0.16, 450); },
 };
 
 /* ============================================================
@@ -1109,6 +1303,23 @@ const PATIENTS = [
   { kuerzel:"Frau Mensah",   sex:"w", alter:77, diag:"Hüft-TEP geplant",                flags:["Prä-OP"],                   kind:"stabil",  pg:2 },
   { kuerzel:"Herr Kim",      sex:"m", alter:61, diag:"Obere GI-Blutung",                flags:["Kreislauf"],                kind:"stabil",  pg:2 },
   { kuerzel:"Herr Tran",     sex:"m", alter:66, diag:"Akute Pankreatitis",              flags:["Schmerz","Aufnahme"],       kind:"stabil",  pg:3 },
+  // Weitere Fälle — bewusst gemischt: 3MRGN/4MRGN NICHT nur bei ausländisch klingenden
+  // Namen, "gewöhnliche" Infektionen (MRSA/C.diff/Tröpfchen) auch bei anderen Herkünften.
+  { kuerzel:"Frau Zimmermann",sex:"w", alter:73, diag:"Postoperativer Wundinfekt · 3MRGN", flags:["3MRGN"],                     kind:"mrgn3",   pg:2 },
+  { kuerzel:"Herr Baumann",  sex:"m", alter:68, diag:"Pneumonie mit 4MRGN-Nachweis",       flags:["4MRGN","Strenge Iso"],       kind:"mrgn4",   pg:3 },
+  { kuerzel:"Frau Petrova",  sex:"w", alter:65, diag:"Wundinfekt, MRSA-positiv",           flags:["MRSA-positiv","Kontakt-Iso"],kind:"mrsa",    pg:3 },
+  { kuerzel:"Herr Osei",     sex:"m", alter:58, diag:"Postantibiotische Diarrhoe",         flags:["C. difficile","Kontakt-Iso"],kind:"cdiff",   pg:3 },
+  { kuerzel:"Frau Lindqvist",sex:"w", alter:84, diag:"End-stage Ovarialkarzinom",          flags:["Sterbebegleitung"],          kind:"sterb",   pg:5 },
+  { kuerzel:"Herr Costa",    sex:"m", alter:25, diag:"Polytrauma nach Motorradunfall",     flags:["post-OP Tag 2"],             kind:"jung",    pg:1 },
+  { kuerzel:"Frau Haddad",   sex:"w", alter:52, diag:"Gallenkolik, konservativ",           flags:["Aufnahme"],                  kind:"stabil",  pg:1 },
+  { kuerzel:"Herr Andersson",sex:"m", alter:70, diag:"Influenza B",                        flags:["Tröpfchen-Iso"],             kind:"tropf",   pg:2 },
+  // Aerogene Isolation — braucht Einzelzimmer MIT SCHLEUSE, nicht nur Einzelzimmer
+  { kuerzel:"Herr Sokolov",     sex:"m", alter:54, diag:"Offene Lungentuberkulose",     flags:["Tuberkulose (offen)"], kind:"aerogen", pg:3 },
+  { kuerzel:"Frau Papadopoulos",sex:"w", alter:29, diag:"Masern, Erwachsenenfall",      flags:["Masern"],              kind:"aerogen", pg:2 },
+  { kuerzel:"Herr Nazari",      sex:"m", alter:34, diag:"Windpocken, immunkompetent",   flags:["Windpocken"],          kind:"aerogen", pg:1 },
+  // Telemetrie — braucht Monitor-Bett, kein normales Zimmer
+  { kuerzel:"Frau Lefebvre",    sex:"w", alter:69, diag:"Z. n. Myokardinfarkt",         flags:["Telemetrie erforderlich"], kind:"telemetrie", pg:2 },
+  { kuerzel:"Herr Karimi",      sex:"m", alter:61, diag:"Neu aufgetretenes Vorhofflimmern", flags:["Telemetrie erforderlich"], kind:"telemetrie", pg:2 },
 ];
 
 /* ============================================================
@@ -1196,6 +1407,11 @@ const ROOMMATES = {
   rm_mrgn4_w: { name:"Frau Jansen", age:75, sex:"w", kind:"mrgn4", pg:3,
     line:"Frau Jansen",
     chips:[{t:sxA("w",75)},{t:"4MRGN-Besiedlung"},{t:"4MRGN",c:"warn"},{t:"Strenge Iso",c:"warn"},{t:"PG 3",c:"pg"}] },
+  // Sonderzimmer (kein Mitbewohner, aber eigene Zimmer-Ausstattung)
+  empty_einzel_schleuse: { empty:true, roomType:"Einzelzimmer mit Schleuse",
+    chips:[{t:"Schleuse",c:"ok"},{t:"Unterdruck",c:"ok"}] },
+  empty_monitor: { empty:true, roomType:"Zimmer mit Monitor-Bett",
+    chips:[{t:"Monitor",c:"ok"},{t:"frei",c:"ok"}] },
 };
 
 /* ============================================================
@@ -1216,6 +1432,10 @@ function checkPair(patient, option) {
     problems.push("VRE-Besiedlung – Kontaktisolation, nicht mit Nicht-VRE.");
   if (patient.kind === "tropf" && rm.kind !== "tropf")
     problems.push("Tröpfcheninfektion – Einzelzimmer oder Kohorte.");
+  if (patient.kind === "aerogen")
+    problems.push("Aerogene Übertragung (Tuberkulose/Masern/Windpocken) – zwingend Einzelzimmer MIT Schleuse, kein Doppelzimmer.");
+  if (patient.kind === "telemetrie")
+    problems.push("Telemetrie-Pflicht – braucht ein Zimmer mit Monitor-Bett, kein normales Doppelzimmer.");
 
   // 4MRGN: wie MRSA, strenge Kontakt-Iso
   if (patient.kind === "mrgn4" && rm.kind !== "mrgn4")
@@ -1231,7 +1451,7 @@ function checkPair(patient, option) {
   if (patient.kind === "immun" && rm.kind === "mrgn3")
     problems.push("Immunsupprimierter nicht zu 3MRGN — Schutzbedürfnis.");
 
-  const infectKinds = ["mrsa","cdiff","noro","vre","tropf","mrgn4"];
+  const infectKinds = ["mrsa","cdiff","noro","vre","tropf","mrgn4","aerogen"];
   if (patient.kind === "immun" && infectKinds.includes(rm.kind))
     problems.push("Immunsupprimierter darf nicht neben Infektiösen – lebensgefährlich.");
   if (infectKinds.includes(patient.kind) && rm.kind === "immun")
@@ -1258,6 +1478,9 @@ function checkPair(patient, option) {
 
   if (rm.sex && patient.sex !== rm.sex)
     problems.push("Gemischtgeschlechtliche Belegung im Doppelzimmer.");
+
+  if (patient.pg >= 4 && rm.pg >= 4)
+    problems.push(`PG ${patient.pg} + PG ${rm.pg} zusammen überlastet die Pflege – besser mit mobilerem Mitpatient (PG 1–2) kombinieren.`);
 
   return problems;
 }
@@ -1331,6 +1554,10 @@ function generateQuestion(patient) {
     }
   } else if (k === "cdiff" || k === "vre" || k === "tropf" || k === "sterb") {
     correctOption = makeOption(nextRoom(), "empty_einzel");
+  } else if (k === "aerogen") {
+    correctOption = makeOption(nextRoom(), "empty_einzel_schleuse");
+  } else if (k === "telemetrie") {
+    correctOption = makeOption(nextRoom(), "empty_monitor");
   } else if (k === "immun") {
     if (Math.random() < 0.5) {
       correctOption = makeOption(nextRoom(), sx === "m" ? "rm_stable_m" : "rm_stable_w");
@@ -1385,6 +1612,11 @@ function generateQuestion(patient) {
     wrongKeys.push(sameUnruhigKey, sameStableKey, sameMrsaKey, sameYoungKey);
   } else if (k === "unruhig") {
     wrongKeys.push(sameSterbKey, oppSexKey, sameImmunKey, sameYoungKey);
+  } else if (k === "aerogen") {
+    // Klassische Falle: normales Einzelzimmer OHNE Schleuse wirkt richtig, ist es aber nicht
+    wrongKeys.push("empty_einzel", sameStableKey, sameImmunKey, sameMrsaKey);
+  } else if (k === "telemetrie") {
+    wrongKeys.push("empty_einzel", sameStableKey, sameImmunKey, sameSterbKey);
   } else {
     // stabil
     wrongKeys.push(oppSexKey, sameMrsaKey, sameSterbKey, sameMrgn4Key);
@@ -1418,14 +1650,15 @@ function renderEventRound(evState) {
     p.flags.forEach(f => {
       if (/^(Kontakt-Iso|Strenge Iso|Tröpfchen-Iso|Standardhygiene)$/i.test(f)) return;
       let c = "";
-      if (/4MRGN/i.test(f) || /MRSA|difficile|Noro|VRE|Tröpfchen|Influenza|RSV/i.test(f)) c = "warn";
-      else if (/3MRGN|Immun|Aplasie|Demenz|Unruhe|Ruft/i.test(f)) c = "alert";
+      if (/4MRGN|Tuberkulose|Masern|Windpocken/i.test(f) || /MRSA|difficile|Noro|VRE|Tröpfchen|Influenza|RSV/i.test(f)) c = "warn";
+      else if (/3MRGN|Immun|Aplasie|Demenz|Unruhe|Ruft|Telemetrie/i.test(f)) c = "alert";
       else if (/Sterbe/i.test(f)) c = "dark";
       chips.push({t:f, c});
     });
     const chipsHtml = chips.map(c => `<span class="mini-chip ${c.c}">${c.t}</span>`).join("");
+    const entry = randomEntry(i);
     return `
-      <button class="option" data-idx="${i}">
+      <button class="option ${entry.cls}" style="${entry.style}" data-idx="${i}">
         <div class="opt-body">
           <div class="opt-top">Zi ${p.roomNum} · ${p.diag}</div>
           <div class="opt-main">${p.kuerzel}</div>
@@ -1434,8 +1667,6 @@ function renderEventRound(evState) {
       </button>
     `;
   }).join("");
-
-  resetFeedbackToIdle();
 
   document.querySelectorAll(".option").forEach(btn => {
     btn.addEventListener("click", () => pickEventOption(parseInt(btn.dataset.idx, 10), btn));
@@ -1449,10 +1680,12 @@ function pickEventOption(idx, btn) {
   const { target, pool } = state.currentEvent;
   const picked = pool[idx];
   const isCorrect = picked === target;
+  let penalty = TIME_PENALTY;
 
   if (isCorrect) {
     state.correctCount++;
     state.streak++;
+    state.wrongStreak = 0;
     if (state.streak > state.bestStreak) state.bestStreak = state.streak;
     let points = 10;
     if (state.streak >= 3) points += Math.min(15, (state.streak - 2) * 3);
@@ -1463,17 +1696,19 @@ function pickEventOption(idx, btn) {
     const rect = btn.getBoundingClientRect();
     floatScore(rect.left + rect.width/2, rect.top, `+${points}`, "plus");
     floatScore(rect.left + rect.width/2, rect.top + 30, `+${TIME_BONUS.toFixed(0)}s`, "plus");
-    snd.correct();
+    if (target.kind !== "sterb") { snd.correct(); } // Sterbebegleitung: kein Ton
     checkBonusTriggers();
   } else {
     state.wrongCount++;
     state.streak = 0;
+    state.wrongStreak++;
     state.kaffeepauseTriggeredAtStreak = -1;
     state.rushTriggeredAtStreak = -1;
     state.schwarmTriggeredAtStreak = -1;
-    state.timeLeft = Math.max(0, state.timeLeft - TIME_PENALTY);
+    penalty = currentWrongPenalty();
+    state.timeLeft = Math.max(0, state.timeLeft - penalty);
     const rect = btn.getBoundingClientRect();
-    floatScore(rect.left + rect.width/2, rect.top, `−${TIME_PENALTY.toFixed(0)}s`, "minus");
+    floatScore(rect.left + rect.width/2, rect.top, `−${penalty.toFixed(0)}s`, "minus");
     snd.wrong();
   }
 
@@ -1484,6 +1719,8 @@ function pickEventOption(idx, btn) {
   });
 
   const fb = document.getElementById("feedbackBox");
+  fb.className = "feedback"; // Reflow erzwingen, sonst re-triggert die Slide-up-Animation nicht (gleicher Keyframe-Name bei ok<->bad)
+  void fb.offsetWidth;
   fb.className = "feedback " + (isCorrect ? "ok" : "bad");
   if (isCorrect) {
     fb.innerHTML = `
@@ -1500,7 +1737,7 @@ function pickEventOption(idx, btn) {
       <div class="fb-head">
         <span class="fb-icon">✕</span>
         <span>Falsch</span>
-        <span class="fb-delta">−${TIME_PENALTY}s</span>
+        <span class="fb-delta">−${penalty.toFixed(0)}s</span>
       </div>
       <div class="fb-body">Gesucht war: ${target.kuerzel} <span class="fb-correct">(${target.diag})</span></div>
     `;
@@ -1535,6 +1772,8 @@ function getCorrectReason(patient, option) {
   if (k === "cdiff") return "C. difficile braucht zwingend Einzelzimmer mit eigener Toilette.";
   if (k === "vre") return "VRE-Besiedlung – Einzelzimmer ist sicher.";
   if (k === "tropf") return "Tröpfchenisolation sauber – andere Patienten geschützt.";
+  if (k === "aerogen") return "Einzelzimmer mit Schleuse – aerogene Übertragung sicher unterbunden.";
+  if (k === "telemetrie") return "Monitor-Bett vorhanden – Telemetrie-Pflicht erfüllt.";
   if (k === "immun" && option.roommate) return "Immunsupprimierter neben stabilem Mitbewohner – passt.";
   if (k === "immun") return "Einzelzimmer ist die sicherste Option für Immunsupprimierte.";
   if (k === "sterb") return "Sterbebegleitung im Einzelzimmer – würdig.";
@@ -1547,10 +1786,14 @@ function getCorrectReason(patient, option) {
    ============================================================ */
 const TIME_START        = 65.0;  // Start-Sekunden
 const TIME_BONUS        = 7.0;   // pro richtig
-const TIME_PENALTY      = 3.0;   // pro falsch
-const TIME_DRAIN_RATE   = 0.7;   // Timer läuft 30 % langsamer als Echtzeit
-const FEEDBACK_OK   = 1600;  // ms Feedback bei richtig
-const FEEDBACK_BAD  = 2800;  // ms Feedback bei falsch (länger zum Lesen)
+const TIME_PENALTY      = 3.0;   // Basis-Abzug pro falsch
+const WRONG_STREAK_PENALTY_STEP = 1.0;  // zusätzliche Sekunden pro weiterem Fehler IN FOLGE
+const WRONG_STREAK_PENALTY_CAP  = 3;    // Deckel: max. 3 Eskalationsstufen (Basis + 3s)
+const TIME_DRAIN_RATE   = 0.7;   // Basistempo: Timer läuft 30 % langsamer als Echtzeit
+const DRAIN_RAMP_PER_CORRECT = 0.015; // Tempo steigt pro richtiger Antwort DIESER Runde (nicht Lifetime-XP)
+const DRAIN_RAMP_CAP_CORRECT = 30;    // ab hier max. Tempo (~+45 % ggü. Basistempo)
+const FEEDBACK_OK   = 480;   // ms — muss nur noch den Pop abdecken, Erklärung bleibt ja stehen (kein Lesezeit-Puffer mehr nötig)
+const FEEDBACK_BAD  = 650;   // ms — etwas länger als OK, damit Shake + Rot-Feedback als "falsch" spürbar registriert
 const HS_KEY        = "noch-ein-bett-highscore";
 const XP_KEY        = "noch-ein-bett-xp";
 
@@ -1570,12 +1813,42 @@ function getLevel(xp) {
   }
   return { ...LEVELS[0], idx: 0, next: LEVELS[1] };
 }
+
+// Progressive Schwierigkeit: welche Fall-Kategorien sind auf diesem Karriere-Level schon dran.
+// null = kein Filter (alles erlaubt). Deckt sich mit den 7 LEVELS oben.
+const LEVEL_KIND_GATES = [
+  ["stabil", "jung"],                                                                                    // Auszubildende:r 1. Jahr — nur Geschlecht/Alter
+  ["stabil", "jung", "mrsa", "noro"],                                                                     // 2. Jahr — Iso-Basics
+  ["stabil", "jung", "mrsa", "noro", "cdiff", "vre", "tropf"],                                            // 3. Jahr — mehr Iso
+  ["stabil", "jung", "mrsa", "noro", "cdiff", "vre", "tropf", "sterb", "unruhig"],                        // Pflegefachkraft — psychosozial
+  ["stabil", "jung", "mrsa", "noro", "cdiff", "vre", "tropf", "sterb", "unruhig", "immun", "mrgn3"],       // Praxisanleitung
+  ["stabil", "jung", "mrsa", "noro", "cdiff", "vre", "tropf", "sterb", "unruhig", "immun", "mrgn3", "mrgn4", "telemetrie"], // Stationsleitung
+  null, // Pflegedirektion — alles, inkl. aerogene Isolation
+];
+function allowedKindsForLevel() {
+  const idx = getLevel(getXp()).idx;
+  return LEVEL_KIND_GATES[Math.min(idx, LEVEL_KIND_GATES.length - 1)];
+}
 function getXp() {
   try { return parseInt(localStorage.getItem(XP_KEY), 10) || 0; } catch(e) { return 0; }
 }
 function saveXp(v) {
   try { localStorage.setItem(XP_KEY, String(v)); } catch(e) {}
 }
+// Test-Helfer: ?setxp=3000 in der URL setzt die XP einmalig und räumt sich danach selbst auf.
+// Levels/Schwellen: 0 / 50 / 150 / 350 / 700 / 1500 / 3000 (siehe LEVELS oben).
+(function applyXpOverride() {
+  try {
+    const params = new URLSearchParams(location.search);
+    if (params.has("setxp")) {
+      const v = parseInt(params.get("setxp"), 10);
+      if (!isNaN(v)) saveXp(Math.max(0, v));
+      params.delete("setxp");
+      const rest = params.toString();
+      history.replaceState(null, "", location.pathname + (rest ? "?" + rest : ""));
+    }
+  } catch(e) {}
+})();
 
 // Bonus-Events
 const GOLDEN_CHANCE     = 0.03;   // 3% pro Runde
@@ -1591,8 +1864,11 @@ const SCHWARM_TRIGGER_STREAK = 15;
 const SCHWARM_ROUNDS         = 5;
 const ISO_KINDS              = ["mrsa","cdiff","noro","vre","tropf","mrgn4"];
 const EVENT_CHANCE           = 0.14;  // Identifikations-Event-Chance pro Runde
-const PERSONAL_CHANCE        = 0.05;  // Personalausfall-Chance pro Runde
+const PERSONAL_CHANCE        = 0.10;  // Personalausfall-Chance pro Runde (war 0.05, soll spürbarer/öfter kommen)
 const PERSONAL_PENALTY       = 2;     // Sekunden Abzug bei Personalausfall
+const NOTFALL_CHANCE         = 0.06;  // Notfall-Ruf-Chance pro Runde — Kontrollverlust, NICHT Timer-Pause wie Kaffeepause
+const NOTFALL_LOCK_DURATION  = 5000;  // ms gesperrt, Timer läuft in dieser Zeit ungebremst weiter
+const BED_CANCEL_CHANCE      = 0.10;  // Chance, dass mitten in einer normalen Runde ein falsches Bett "storniert" wird
 
 /* Zufalls-Pools für Event-Patient:innen */
 const SURNAMES = [
@@ -1648,6 +1924,9 @@ const DIAGS = [
   { kind:"mrgn3",   text:"Wundinfekt 3MRGN",              flags:["3MRGN"] },
   { kind:"mrgn4",   text:"Pneumonie mit 4MRGN",           flags:["4MRGN","Strenge Iso"] },
   { kind:"mrgn4",   text:"4MRGN-Besiedlung",              flags:["4MRGN","Strenge Iso"] },
+  { kind:"aerogen", text:"Offene Lungentuberkulose",       flags:["Tuberkulose (offen)"] },
+  { kind:"aerogen", text:"Masern, Erwachsenenfall",        flags:["Masern"] },
+  { kind:"telemetrie", text:"Neu aufgetretenes Vorhofflimmern", flags:["Telemetrie erforderlich"] },
 ];
 
 const BLOOD_GROUPS = ["A+","A−","0+","0−","B+","B−","AB+","AB−"];
@@ -1689,8 +1968,10 @@ function generateRandomPatient() {
 /* Identifikations-Events: 5 Patient-Karten, eine richtige Antwort
    Auswahl so, dass jede:r der 5 aus einem anderen Krankheitsbild kommt */
 function makeIdentificationEvent() {
+  const kindGate = allowedKindsForLevel();
+  const diagsPool = kindGate ? DIAGS.filter(d => kindGate.includes(d.kind)) : DIAGS;
   const byKind = {};
-  DIAGS.forEach(d => {
+  (diagsPool.length ? diagsPool : DIAGS).forEach(d => {
     if (!byKind[d.kind]) byKind[d.kind] = [];
     byKind[d.kind].push(d);
   });
@@ -1721,6 +2002,10 @@ function makeIdentificationEvent() {
     {
       label: "Telefon-Anfrage",
       q: `Am Telefon Hausarzt für ${target.kuerzel} — wer ist gemeint?`
+    },
+    {
+      label: "Angehörige ohne Schutzkleidung",
+      q: `Angehörige kommen ohne Schutzkleidung aus dem Zimmer von ${target.kuerzel} — bei wem war das?`
     },
     {
       label: "Sono-Untersuchung",
@@ -1770,6 +2055,7 @@ function newGame() {
     wrongCount: 0,
     streak: 0,
     bestStreak: 0,
+    wrongStreak: 0,
     startTs: Date.now(),
     locked: false,
     currentPatient: null,
@@ -1788,6 +2074,7 @@ function newGame() {
   };
   showScreen("quizScreen");
   updateTopbar();
+  resetFeedbackToIdle();
   nextRound();
   startTimer();
   snd.bell();
@@ -1806,7 +2093,8 @@ function tick() {
   const now = performance.now();
   const dt = (now - state._lastTick) / 1000;
   state._lastTick = now;
-  const mult = state.rushRounds > 0 ? RUSH_TIME_MULT : 1;
+  const rampMult = 1 + Math.min(state.correctCount, DRAIN_RAMP_CAP_CORRECT) * DRAIN_RAMP_PER_CORRECT;
+  const mult = state.rushRounds > 0 ? RUSH_TIME_MULT : rampMult;
   state.timeLeft = Math.max(0, state.timeLeft - dt * mult * TIME_DRAIN_RATE);
   renderTimer();
   if (state.timeLeft <= 0) {
@@ -1832,13 +2120,79 @@ function checkBonusTriggers() {
   }
 }
 
+// state.wrongStreak wird VOR dem Aufruf hochgezählt — 1. Fehler in Folge = Basis-Malus,
+// ab dem 2. steigt es, gedeckelt bei WRONG_STREAK_PENALTY_CAP Stufen.
+function currentWrongPenalty() {
+  return TIME_PENALTY + Math.min(state.wrongStreak - 1, WRONG_STREAK_PENALTY_CAP) * WRONG_STREAK_PENALTY_STEP;
+}
+
 function doKaffeepause() {
   state.paused = true;
   showTriggerBanner("☕ KAFFEEPAUSE", `Timer pausiert ${KAFFEEPAUSE_DURATION/1000} Sekunden`, "pause");
+  setFeedbackAlert("Kaffeepause", `Kurze Verschnaufpause — der Timer steht ${KAFFEEPAUSE_DURATION/1000} Sekunden still.`);
   setTimeout(() => { if (state) state.paused = false; }, KAFFEEPAUSE_DURATION);
 }
 
+/* Notfall-Ruf: Kontrollverlust statt Zeitverlust — man sieht die Runde, kann aber
+   kurz nicht handeln, während der Timer normal weiterläuft. Wird am Ende von
+   nextRound() aufgerufen, NACH dem normalen Render, damit das "locked=false" vom
+   Rundenaufbau die Sperre nicht sofort wieder aufhebt. */
+/* Persistente Erklärung im unteren Panel für Ereignisse, die keine Antwort sind
+   (Notfall, Storno) — sonst steht dort nur die veraltete Erklärung der letzten Runde,
+   während der eigentlich relevante Hinweis nur 1,5s im Center-Banner aufblitzt. */
+function setFeedbackAlert(head, body) {
+  const fb = document.getElementById("feedbackBox");
+  if (!fb) return;
+  fb.className = "feedback";
+  void fb.offsetWidth;
+  fb.className = "feedback alert";
+  fb.innerHTML = `
+    <div class="fb-head"><span class="fb-icon">!</span><span>${head}</span></div>
+    <div class="fb-body">${body}</div>
+  `;
+}
+
+function doNotfallruf() {
+  state.locked = true;
+  const oc = document.getElementById("optionsContainer");
+  if (oc) oc.classList.add("locked-out");
+  showTriggerBanner("NOTFALL-RUF", `Reanimation Zimmer ${1 + Math.floor(Math.random() * 12)} · alle Verfügbaren!`, "notfall");
+  setFeedbackAlert("Notfall-Ruf", "Kurz blockiert — die Zeit läuft in dieser Zeit trotzdem weiter.");
+  vib([40, 60, 40, 60, 40]);
+  setTimeout(() => {
+    if (!state) return;
+    state.locked = false;
+    const oc2 = document.getElementById("optionsContainer");
+    if (oc2) oc2.classList.remove("locked-out");
+  }, NOTFALL_LOCK_DURATION);
+}
+
+/* Bett storniert: mitten in einer normalen Runde fällt eine der FALSCHEN Optionen
+   weg — die richtige Antwort bleibt garantiert immer wählbar, die Runde bleibt lösbar. */
+function maybeCancelBed() {
+  if (!state.currentOptions) return;
+  if (Math.random() >= BED_CANCEL_CHANCE) return;
+  const wrongIdx = state.currentOptions
+    .map((o, i) => (o._correct ? -1 : i))
+    .filter(i => i !== -1);
+  if (!wrongIdx.length) return;
+  const idx = wrongIdx[Math.floor(Math.random() * wrongIdx.length)];
+  const optionsSnapshot = state.currentOptions;
+  setTimeout(() => {
+    if (!state || state.currentOptions !== optionsSnapshot || state.locked) return; // Runde vorbei oder schon beantwortet
+    const btn = document.querySelector(`#optionsContainer .option[data-idx="${idx}"]`);
+    if (!btn || btn.classList.contains("disabled") || btn.classList.contains("cancelled")) return;
+    btn.classList.add("cancelled");
+    showTriggerBanner("BETT STORNIERT", "Gerade durch die Notaufnahme belegt", "personal");
+    setFeedbackAlert("Bett storniert", "Ein Bett ist gerade weggefallen — wähl eine der verbleibenden Optionen.");
+    vib(30);
+  }, 900 + Math.random() * 700);
+}
+
 function showTriggerBanner(title, subtitle, cls) {
+  // Nie zwei Banner gleichzeitig zeigen — bei knapper Timing-Überlappung (z. B. Kaffeepause
+  // direkt gefolgt von einer neuen Runde mit eigenem Event) sonst zwei übereinander sichtbar.
+  document.querySelectorAll(".trigger-banner").forEach(el => el.remove());
   const banner = document.createElement("div");
   banner.className = "trigger-banner " + cls;
   banner.innerHTML = `<div class="tb-title">${title}</div><div class="tb-sub">${subtitle}</div>`;
@@ -1913,18 +2267,34 @@ function vib(pattern) {
   try { if (navigator.vibrate) navigator.vibrate(pattern); } catch(e) {}
 }
 
+/* Zufällige Einflug-Richtung/-Winkel/-Timing pro Options-Karte — bewusst nicht nur
+   links/rechts binär, sonst liest sich das über wenige Karten schnell wie ein Muster. */
+function randomEntry(i) {
+  const dir = Math.random() < 0.5 ? "dir-l" : "dir-r";
+  const rot = (dir === "dir-l" ? -1 : 1) * (4 + Math.random() * 7);
+  const delay = i * 0.08 + Math.random() * 0.09;
+  return { cls: dir, style: `--rot:${rot.toFixed(1)}deg; animation-delay:${delay.toFixed(2)}s` };
+}
+
 function nextRound() {
   // Events nur nach Aufwärmphase und nicht während Rush/Schwarm
-  const canEvent = state.correctCount >= 3 && state.rushRounds === 0 && state.schwarmRounds === 0;
+  const canEvent = state.correctCount >= 3 && state.rushRounds === 0 && state.schwarmRounds === 0 && !state.paused;
 
-  // Personalausfall — einmaliger Zeitabzug
-  if (canEvent && Math.random() < PERSONAL_CHANCE) {
+  // Rundenstart-Events sind bewusst gegenseitig ausschließend (max. eins pro Runde),
+  // sonst kippt die Balance schnell in "zu viel gleichzeitig" statt "spürbarer Stress".
+  let notfallThisRound = false;
+  let otherStartEvent = false;
+  if (canEvent && Math.random() < NOTFALL_CHANCE) {
+    notfallThisRound = true;
+  } else if (canEvent && Math.random() < PERSONAL_CHANCE) {
+    otherStartEvent = true;
     state.timeLeft = Math.max(0, state.timeLeft - PERSONAL_PENALTY);
     showTriggerBanner("Personalausfall", `Kollegin krank · −${PERSONAL_PENALTY} s`, "personal");
+    setFeedbackAlert("Personalausfall", `Eine Kollegin ist ausgefallen — das kostet dich ${PERSONAL_PENALTY} Sekunden.`);
   }
 
   // Identifikations-Event — ersetzt die normale Aufnahme-Runde
-  if (canEvent && Math.random() < EVENT_CHANCE) {
+  if (canEvent && !notfallThisRound && !otherStartEvent && Math.random() < EVENT_CHANCE) {
     state.currentEvent = makeIdentificationEvent();
     state.currentPatient = null;
     state.currentOptions = null;
@@ -1936,11 +2306,14 @@ function nextRound() {
   }
   state.currentEvent = null;
 
-  // Patient-Pool nach aktivem Modus
-  let pool = PATIENTS;
+  // Patient-Pool nach Level (progressive Schwierigkeit) und aktivem Modus
+  const kindGate = allowedKindsForLevel();
+  let pool = kindGate ? PATIENTS.filter(p => kindGate.includes(p.kind)) : PATIENTS;
   if (state.schwarmRounds > 0) {
-    pool = PATIENTS.filter(p => ISO_KINDS.includes(p.kind));
+    const schwarmPool = pool.filter(p => ISO_KINDS.includes(p.kind));
+    pool = schwarmPool.length ? schwarmPool : pool;
   }
+  if (!pool.length) pool = PATIENTS; // Sicherheitsnetz, falls eine Kombination leerläuft
   const patient = pool[Math.floor(Math.random() * pool.length)];
   const options = generateQuestion(patient);
   state.currentPatient = patient;
@@ -1962,9 +2335,9 @@ function nextRound() {
   });
   const flagsHtml = filteredFlags.map(f => {
     let cls = "flag";
-    if (/^4MRGN|Strenge Iso/i.test(f) || /MRSA|difficile|Noro|VRE|Tröpfchen|Influenza|RSV/i.test(f)) cls += " warn";
+    if (/^4MRGN|Strenge Iso|Tuberkulose|Masern|Windpocken/i.test(f) || /MRSA|difficile|Noro|VRE|Tröpfchen|Influenza|RSV/i.test(f)) cls += " warn";
     else if (/3MRGN|Standardhygiene/i.test(f)) cls += " alert";
-    else if (/Immun|Aplasie|Demenz|Unruhe|Ruft/i.test(f)) cls += " alert";
+    else if (/Immun|Aplasie|Demenz|Unruhe|Ruft|Telemetrie/i.test(f)) cls += " alert";
     else if (/Sterbe/i.test(f)) cls += " dark";
     return `<span class="${cls}">${f}</span>`;
   }).join("");
@@ -1989,8 +2362,9 @@ function nextRound() {
     const chipsHtml = cleanChips.map(c => `<span class="mini-chip ${c.c || ''}">${c.t}</span>`).join("");
     const mainText = opt.empty ? opt.roomType : opt.roommate.line;
     const leftIcon = opt.empty ? `<div class="opt-empty-icon">＋</div>` : "";
+    const entry = randomEntry(i);
     return `
-    <button class="option${opt.empty ? ' is-empty' : ''}" data-idx="${i}">
+    <button class="option${opt.empty ? ' is-empty' : ''} ${entry.cls}" style="${entry.style}" data-idx="${i}">
       ${leftIcon}
       <div class="opt-body">
         <div class="opt-top">${opt.label}</div>
@@ -2000,11 +2374,17 @@ function nextRound() {
     </button>`;
   }).join("");
 
-  resetFeedbackToIdle();
-
   document.querySelectorAll(".option").forEach(btn => {
     btn.addEventListener("click", () => pickOption(parseInt(btn.dataset.idx, 10), btn));
   });
+
+  // Ganz am Ende: Notfall-Ruf sperrt die frisch gerenderte Runde (nach dem locked=false
+  // oben), Bett-Storno greift mit Verzögerung in dieselbe Runde ein.
+  if (notfallThisRound) {
+    doNotfallruf();
+  } else if (!otherStartEvent) {
+    maybeCancelBed();
+  }
 
   updateTopbar();
 }
@@ -2043,11 +2423,13 @@ function pickOption(idx, btn) {
   const option = state.currentOptions[idx];
   const problems = checkPair(patient, option);
   const isCorrect = problems.length === 0 && option._correct;
+  let penalty = TIME_PENALTY;
 
   // Punkte und Zeit
   if (isCorrect) {
     state.correctCount++;
     state.streak++;
+    state.wrongStreak = 0;
     if (state.streak > state.bestStreak) state.bestStreak = state.streak;
 
     // Basis +10 pro richtig, Streak-Bonus ab 3
@@ -2081,7 +2463,9 @@ function pickOption(idx, btn) {
     floatScore(rect.left + rect.width/2, rect.top, `+${points}`, "plus");
     floatScore(rect.left + rect.width/2, rect.top + 30, `+${timeBonus.toFixed(0)}s`, "plus");
 
-    if (state.goldenThisRound) {
+    if (patient.kind === "sterb") {
+      // kein Ton — hier feiern wir nicht
+    } else if (state.goldenThisRound) {
       snd.streak();
     } else if (state.streak === 3 || state.streak === 5 || state.streak === 10 || state.streak === 15 || (state.streak % 10 === 0 && state.streak > 0)) {
       snd.streak();
@@ -2094,12 +2478,14 @@ function pickOption(idx, btn) {
   } else {
     state.wrongCount++;
     state.streak = 0;
+    state.wrongStreak++;
     state.kaffeepauseTriggeredAtStreak = -1;
     state.rushTriggeredAtStreak = -1;
     state.schwarmTriggeredAtStreak = -1;
-    state.timeLeft = Math.max(0, state.timeLeft - TIME_PENALTY);
+    penalty = currentWrongPenalty();
+    state.timeLeft = Math.max(0, state.timeLeft - penalty);
     const rect = btn.getBoundingClientRect();
-    floatScore(rect.left + rect.width/2, rect.top, `−${TIME_PENALTY.toFixed(0)}s`, "minus");
+    floatScore(rect.left + rect.width/2, rect.top, `−${penalty.toFixed(0)}s`, "minus");
     snd.wrong();
   }
 
@@ -2116,6 +2502,8 @@ function pickOption(idx, btn) {
 
   // Feedback: fester Bereich unten
   const fb = document.getElementById("feedbackBox");
+  fb.className = "feedback"; // Reflow erzwingen, sonst re-triggert die Slide-up-Animation nicht (gleicher Keyframe-Name bei ok<->bad)
+  void fb.offsetWidth;
   fb.className = "feedback " + (isCorrect ? "ok" : "bad");
   if (isCorrect) {
     const reason = getCorrectReason(patient, option);
@@ -2136,7 +2524,7 @@ function pickOption(idx, btn) {
       <div class="fb-head">
         <span class="fb-icon">✕</span>
         <span>Falsch</span>
-        <span class="fb-delta">−${TIME_PENALTY}s</span>
+        <span class="fb-delta">−${penalty.toFixed(0)}s</span>
       </div>
       <div class="fb-body">
         ${reasons}
