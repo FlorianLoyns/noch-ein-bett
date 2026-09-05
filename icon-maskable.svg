@@ -8,6 +8,10 @@
       <stop offset="0%" stop-color="#4f0031" stop-opacity="0.45"/>
       <stop offset="100%" stop-color="#4f0031" stop-opacity="0"/>
     </radialGradient>
+    <radialGradient id="iconGlow" cx="50%" cy="52%" r="52%">
+      <stop offset="0%" stop-color="#ee343b" stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="#ee343b" stop-opacity="0"/>
+    </radialGradient>
     <linearGradient id="limeA" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0%" stop-color="#d4f501"/>
       <stop offset="100%" stop-color="#88d600"/>
@@ -17,17 +21,19 @@
       <stop offset="100%" stop-color="#ee343b"/>
     </linearGradient>
   </defs>
+
   <rect width="512" height="512" fill="#080512"/>
   <rect width="512" height="512" fill="url(#glow1)"/>
   <rect width="512" height="512" fill="url(#glow2)"/>
-  <g transform="translate(256,256) scale(0.70) translate(-256,-256)">
-    <g transform="rotate(-7 150 256) translate(0,-22)">
-      <rect x="60" y="67" width="180" height="378" rx="55" fill="url(#limeA)" stroke="#04020b" stroke-width="15"/>
-      <rect x="89" y="98" width="122" height="92" rx="31" fill="#04020b" fill-opacity="0.85"/>
-    </g>
-    <g transform="rotate(7 362 256) translate(0,22)">
-      <rect x="272" y="67" width="180" height="378" rx="55" fill="url(#magA)" stroke="#04020b" stroke-width="15"/>
-      <rect x="301" y="98" width="122" height="92" rx="31" fill="#04020b" fill-opacity="0.85"/>
-    </g>
+
+  <!-- deutlich mehr Sicherheitsabstand: wird von Android voll angeschnitten/maskiert -->
+  <g transform="translate(256,256) scale(0.66) translate(-256,-256)">
+    <circle cx="256" cy="256" r="230" fill="url(#iconGlow)"/>
+    <path d="M194,106 H318 V194 H406 V318 H318 V406 H194 V318 H106 V194 H194 Z"
+          fill="url(#magA)" stroke="#04020b" stroke-width="26" stroke-linejoin="round"
+          transform="rotate(-5 256 256)"/>
+    <path d="M338,64 L188,296 L246,296 L206,448 L366,232 L296,232 Z"
+          fill="url(#limeA)" stroke="#04020b" stroke-width="22" stroke-linejoin="round"
+          transform="rotate(3 256 256)"/>
   </g>
 </svg>

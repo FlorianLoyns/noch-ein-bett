@@ -254,6 +254,7 @@
         var(--bg);
       padding: 12px 14px 0;
       padding-top: max(12px, env(safe-area-inset-top));
+      padding-bottom: max(10px, env(safe-area-inset-bottom));
       gap: 10px;
     }
 
@@ -1676,6 +1677,7 @@ function renderEventRound(evState) {
 function pickEventOption(idx, btn) {
   if (state.locked) return;
   state.locked = true;
+  if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
 
   const { target, pool } = state.currentEvent;
   const picked = pool[idx];
@@ -2418,6 +2420,7 @@ function simplifyOptionChips(opt) {
 function pickOption(idx, btn) {
   if (state.locked) return;
   state.locked = true;
+  if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
 
   const patient = state.currentPatient;
   const option = state.currentOptions[idx];
@@ -2781,6 +2784,9 @@ document.getElementById("btnBack").addEventListener("click", () => {
 document.addEventListener("visibilitychange", () => {
   if (!state) return;
   state.paused = document.hidden;
+  // iOS suspendiert den AudioContext beim Sperren/App-Wechsel und reaktiviert ihn
+  // nicht von selbst — ohne diesen Resume bleibt der Sound bis zum Neustart stumm.
+  if (!document.hidden && audioCtx && audioCtx.state === "suspended") audioCtx.resume();
 });
 
 // PWA
