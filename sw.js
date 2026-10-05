@@ -1,5 +1,5 @@
 // Service Worker für Offline-Nutzung
-const CACHE = "noch-ein-bett-v8";
+const CACHE = "noch-ein-bett-v9";
 const FILES = [
   "./",
   "index.html",
